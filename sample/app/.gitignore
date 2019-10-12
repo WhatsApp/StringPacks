@@ -1,0 +1,5 @@
+*.pack
+.gradle/
+/.idea/**
+build/
+local.properties

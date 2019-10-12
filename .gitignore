@@ -1,0 +1,10 @@
+!/.idea/codeStyles/**
+*.iml
+*.swo
+*.swp
+*~
+.DS_Store
+.gradle/
+/.idea/**
+build/
+local.properties
