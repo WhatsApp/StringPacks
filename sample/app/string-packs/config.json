@@ -1,0 +1,8 @@
+{
+  "original_resources_directories": [
+    "app/src/main/res"
+  ],
+  "packable_strings_directory": "app/string-packs/strings",
+  "assets_directory": "app/src/main/assets",
+  "pack_ids_class_file_path": "app/src/main/java/com/whatsapp/stringpacks/sample/StringPackIds.java"
+}
