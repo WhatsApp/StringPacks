@@ -31,7 +31,7 @@ There are a few steps to walk through before you can really use packed strings i
 
 ### Runtime
 
-Since the translated strings are moved to our special binary format (`.pack` files), your application needs a way to read those strings during runtime. The library provides a wrapper class for [`Context`](https://developer.android.com/reference/android/content/ContextWrapper) and [`Resoruces`](https://developer.android.com/reference/android/content/res/Resources) to help with that.
+Since the translated strings are moved to our special binary format (`.pack` files), your application needs a way to read those strings during runtime. The library provides a wrapper class for [`Context`](https://developer.android.com/reference/android/content/ContextWrapper) and [`Resources`](https://developer.android.com/reference/android/content/res/Resources) to help with that.
 
 You need to add the following code to all subclasses of your Context class (like [`Activity`](https://developer.android.com/reference/android/app/Activity) and [`Service`](https://developer.android.com/reference/android/app/Service)) to ensure the strings are read from `.pack` files instead of Android system resources.
 
