@@ -14,6 +14,7 @@ public class StringPackIds {
     StringPacks.getInstance().register(
         new int[] {
             // region StringPacks ID Map
+          R.string.hello_world, 0,
             // endregion
         });
   }
