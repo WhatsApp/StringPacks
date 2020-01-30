@@ -20,6 +20,10 @@ import java.util.Locale;
 public class ParsedStringPack {
   @Nullable private SparseArray<String> strings;
   @Nullable private SparseArray<String[]> plurals;
+  private int startOfLocaleData;
+  private int startOfStringData;
+  private Charset encoding;
+  @NonNull private final byte[] input;
 
   private static final Charset ASCII = Charset.forName("US-ASCII");
 
@@ -34,23 +38,26 @@ public class ParsedStringPack {
   private static final int HEADER_SIZE = 11;
 
   public ParsedStringPack(@NonNull InputStream inputStream, @NonNull List<String> parentLocales) {
-    final byte[] input = byteArrayFromInputStream(inputStream);
-    if (input == null) {
+    final byte[] byteArray = byteArrayFromInputStream(inputStream);
+    if (byteArray == null) {
       SpLog.e("ParsedStringPack: could not read the language pack");
+      input = new byte[0]; // Just to make sure we assign something to satisfy @NonNull
       return;
+    } else {
+      input = byteArray;
     }
     if (input.length < HEADER_SIZE) {
       SpLog.e("ParsedStringPack: header incomplete");
       return;
     }
-    final int numLocales = read16BitsFrom(input, 0);
-    final int startOfLocaleData = read32BitsFrom(input, 2);
+    final int numLocales = read16BitsFrom(0);
+    startOfLocaleData = read32BitsFrom(2);
     final byte encodingId = input[6];
     if (encodingId >= ENCODINGS.length) {
       SpLog.e("ParsedStringPack: unrecognized encoding");
     }
-    final Charset encoding = ENCODINGS[encodingId];
-    final int startOfStringData = read32BitsFrom(input, 7);
+    encoding = ENCODINGS[encodingId];
+    startOfStringData = read32BitsFrom(7);
     if (input.length < startOfLocaleData || input.length < startOfStringData) {
       SpLog.e(
           String.format(
@@ -71,7 +78,7 @@ public class ParsedStringPack {
     int numMatches = 0;
     final int[] translationLocations = new int[parentLocales.size()];
     for (int i = 0; i < numLocales; i++) {
-      final String resourceLocale = readLocaleFrom(input, caret);
+      final String resourceLocale = readLocaleFrom(caret);
       final int listIndex = parentLocales.indexOf(resourceLocale);
       if (listIndex != -1) { // Matching locale found
         numMatches++;
@@ -90,7 +97,7 @@ public class ParsedStringPack {
       }
       // Since parentLocales is ordered from less specific to more specific, it's OK to
       // read the translations multiple times, since the later ones override the earlier ones.
-      readTranslations(input, translationLocation, startOfLocaleData, startOfStringData, encoding);
+      readTranslations(translationLocation);
     }
   }
 
@@ -111,7 +118,7 @@ public class ParsedStringPack {
   }
 
   @NonNull
-  private static String readLocaleFrom(@NonNull byte[] input, @IntRange(from = 0) int offset) {
+  private String readLocaleFrom(@IntRange(from = 0) int offset) {
     final int length;
     if (input[offset + 2] == '\0') {
       length = 2;
@@ -123,25 +130,20 @@ public class ParsedStringPack {
     return new String(input, offset, length, ASCII);
   }
 
-  private static int read32BitsFrom(@NonNull byte[] input, @IntRange(from = 0) int offset) {
+  private int read32BitsFrom(@IntRange(from = 0) int offset) {
     return (input[offset] & 0xFF)
         | ((input[offset + 1] & 0xFF) << 8)
         | ((input[offset + 2] & 0xFF) << 16)
         | ((input[offset + 3] & 0xFF) << 24);
   }
 
-  private static int read16BitsFrom(@NonNull byte[] input, @IntRange(from = 0) int offset) {
+  private int read16BitsFrom(@IntRange(from = 0) int offset) {
     return (input[offset] & 0xFF) | ((input[offset + 1] & 0xFF) << 8);
   }
 
-  private void readTranslations(
-      @NonNull byte[] input,
-      @IntRange(from = 0) int caret,
-      @IntRange(from = 0) int startOfLocaleData,
-      @IntRange(from = 0) int startOfStringData,
-      @NonNull Charset encoding) {
+  private void readTranslations(@IntRange(from = 0) int caret) {
     caret += LOCALE_CODE_SIZE;
-    final int headerStart = read32BitsFrom(input, caret);
+    final int headerStart = read32BitsFrom(caret);
     caret = startOfLocaleData + headerStart;
     if (input.length < caret + 4) {
       SpLog.e(
@@ -151,9 +153,9 @@ public class ParsedStringPack {
               input.length));
       return;
     }
-    final int numStrings = read16BitsFrom(input, caret);
+    final int numStrings = read16BitsFrom(caret);
     caret += 2;
-    final int numPlurals = read16BitsFrom(input, caret);
+    final int numPlurals = read16BitsFrom(caret);
     caret += 2;
     if (input.length < caret + 10 * numStrings) {
       SpLog.e(
@@ -169,11 +171,11 @@ public class ParsedStringPack {
       strings = new SparseArray<>(numStrings);
     }
     for (int i = 0; i < numStrings; i++) {
-      final int id = read16BitsFrom(input, caret);
+      final int id = read16BitsFrom(caret);
       caret += 2;
-      final int stringStart = read32BitsFrom(input, caret);
+      final int stringStart = read32BitsFrom(caret);
       caret += 4;
-      final int stringLen = read16BitsFrom(input, caret);
+      final int stringLen = read16BitsFrom(caret);
       caret += 2;
       strings.append(id, new String(input, startOfStringData + stringStart, stringLen, encoding));
     }
@@ -181,15 +183,15 @@ public class ParsedStringPack {
       plurals = new SparseArray<>(numPlurals);
     }
     for (int i = 0; i < numPlurals; i++) {
-      final int id = read16BitsFrom(input, caret);
+      final int id = read16BitsFrom(caret);
       caret += 2;
       final int quantityCount = input[caret++];
       final String[] plural = new String[6];
       for (int j = 0; j < quantityCount; j++) {
         final int quantityId = input[caret++];
-        final int stringStart = read32BitsFrom(input, caret);
+        final int stringStart = read32BitsFrom(caret);
         caret += 4;
-        final int stringLen = read16BitsFrom(input, caret);
+        final int stringLen = read16BitsFrom(caret);
         caret += 2;
         plural[quantityId] =
             new String(input, startOfStringData + stringStart, stringLen, encoding);
