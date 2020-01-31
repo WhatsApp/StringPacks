@@ -91,6 +91,20 @@ public class ParsedStringPack {
       }
       caret += LOCALE_CODE_SIZE + 4;
     }
+    translationLocations = deleteZerosFrom(translationLocations, numMatches);
+  }
+
+  // Takes an array and returns a new array with all zeros deleted. This is used for
+  // avoiding unnecessary zero checks later when trying to load translations.
+  private static int[] deleteZerosFrom(int[] inputArray, int numNonZeros) {
+    final int[] result = new int[numNonZeros];
+    int resultIndex = 0;
+    for (int value : inputArray) {
+      if (value != 0) {
+        result[resultIndex++] = value;
+      }
+    }
+    return result;
   }
 
   @Nullable
@@ -242,10 +256,6 @@ public class ParsedStringPack {
     // translation.
     for (int i = translationLocations.length - 1; i >= 0; i--) {
       final int translationLocation = translationLocations[i];
-      if (translationLocation == 0) {
-        // No translation found for the location at the corresponding index.
-        continue;
-      }
       final String translation = findString(translationLocation, id);
       if (translation != null) {
         strings.put(id, translation);
@@ -259,10 +269,6 @@ public class ParsedStringPack {
   private String[] loadPlural(int id) {
     for (int i = translationLocations.length - 1; i >= 0; i--) {
       final int translationLocation = translationLocations[i];
-      if (translationLocation == 0) {
-        // No translation found for the location at the corresponding index.
-        continue;
-      }
       final String[] plural = findPlural(translationLocation, id);
       if (plural != null) {
         plurals.put(id, plural);
@@ -273,15 +279,8 @@ public class ParsedStringPack {
   }
 
   public boolean isEmpty() {
-    // If there are any translations for any locales in the parent locale list,
-    // this cannot be empty.
     // TODO(roozbehp): Investigate if we need to be more conservative and actually check for data.
-    for (int translationLocation : translationLocations) {
-      if (translationLocation != 0) {
-        return false;
-      }
-    }
-    return true;
+    return translationLocations.length == 0;
   }
 
   @Nullable
