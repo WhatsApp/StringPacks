@@ -20,11 +20,10 @@ import java.util.Locale;
 public class ParsedStringPack {
   @NonNull private SparseArray<String> strings = new SparseArray<>();
   @NonNull private SparseArray<String[]> plurals = new SparseArray<>();
-  private int startOfLocaleData;
   private int startOfStringData;
   private Charset encoding;
   @NonNull private final byte[] input;
-  private int[] translationLocations;
+  private int[] headerLocations;
 
   private static final Charset ASCII = Charset.forName("US-ASCII");
 
@@ -52,7 +51,7 @@ public class ParsedStringPack {
       return;
     }
     final int numLocales = read16BitsFrom(0);
-    startOfLocaleData = read32BitsFrom(2);
+    final int startOfLocaleData = read32BitsFrom(2);
     final byte encodingId = input[6];
     if (encodingId >= ENCODINGS.length) {
       SpLog.e("ParsedStringPack: unrecognized encoding");
@@ -77,7 +76,7 @@ public class ParsedStringPack {
 
     int caret = HEADER_SIZE;
     int numMatches = 0;
-    translationLocations = new int[parentLocales.size()];
+    final int[] translationLocations = new int[parentLocales.size()];
     for (int i = 0; i < numLocales; i++) {
       final String resourceLocale = readLocaleFrom(caret);
       final int listIndex = parentLocales.indexOf(resourceLocale);
@@ -91,20 +90,25 @@ public class ParsedStringPack {
       }
       caret += LOCALE_CODE_SIZE + 4;
     }
-    translationLocations = deleteZerosFrom(translationLocations, numMatches);
-  }
 
-  // Takes an array and returns a new array with all zeros deleted. This is used for
-  // avoiding unnecessary zero checks later when trying to load translations.
-  private static int[] deleteZerosFrom(int[] inputArray, int numNonZeros) {
-    final int[] result = new int[numNonZeros];
-    int resultIndex = 0;
-    for (int value : inputArray) {
-      if (value != 0) {
-        result[resultIndex++] = value;
+    int headerLocationIndex = 0;
+    headerLocations = new int[numMatches];
+    for (int translationLocation : translationLocations) {
+      if (translationLocation == 0) {
+        continue;
       }
+      final int headerStart = read32BitsFrom(translationLocation + LOCALE_CODE_SIZE);
+      headerLocations[headerLocationIndex] = startOfLocaleData + headerStart;
+      if (input.length < headerLocations[headerLocationIndex] + 4) {
+        SpLog.e(
+            String.format(
+                Locale.US,
+                "ParsedStringPack: header for locale incomplete, input.length=%d",
+                input.length));
+        return;
+      }
+      headerLocationIndex++;
     }
-    return result;
   }
 
   @Nullable
@@ -148,17 +152,8 @@ public class ParsedStringPack {
   }
 
   @Nullable
-  private String findString(int translationLocation, int id) {
-    final int headerStart = read32BitsFrom(translationLocation + LOCALE_CODE_SIZE);
-    int caret = startOfLocaleData + headerStart;
-    if (input.length < caret + 4) {
-      SpLog.e(
-          String.format(
-              Locale.US,
-              "ParsedStringPack/findString: header for locale incomplete, input.length=%d",
-              input.length));
-      return null;
-    }
+  private String findString(int headerLocation, int id) {
+    int caret = headerLocation;
     final int numStrings = read16BitsFrom(caret);
     // Skip 2 bytes for the number of strings, and another 2 bytes for the number of plurals, which
     // we don't care about here.
@@ -194,17 +189,8 @@ public class ParsedStringPack {
   }
 
   @Nullable
-  private String[] findPlural(int translationLocation, int id) {
-    final int headerStart = read32BitsFrom(translationLocation + LOCALE_CODE_SIZE);
-    int caret = startOfLocaleData + headerStart;
-    if (input.length < caret + 4) {
-      SpLog.e(
-          String.format(
-              Locale.US,
-              "ParsedStringPack/findString: header for locale incomplete, input.length=%d",
-              input.length));
-      return null;
-    }
+  private String[] findPlural(int headerLocation, int id) {
+    int caret = headerLocation;
     final int numStrings = read16BitsFrom(caret);
     caret += 2;
     final int numPlurals = read16BitsFrom(caret);
@@ -254,9 +240,8 @@ public class ParsedStringPack {
   private String loadString(int id) {
     // Start from the most specific locale, which is at the end of the array, and find the first
     // translation.
-    for (int i = translationLocations.length - 1; i >= 0; i--) {
-      final int translationLocation = translationLocations[i];
-      final String translation = findString(translationLocation, id);
+    for (int i = headerLocations.length - 1; i >= 0; i--) {
+      final String translation = findString(headerLocations[i], id);
       if (translation != null) {
         strings.put(id, translation);
         return translation;
@@ -267,9 +252,8 @@ public class ParsedStringPack {
 
   @Nullable
   private String[] loadPlural(int id) {
-    for (int i = translationLocations.length - 1; i >= 0; i--) {
-      final int translationLocation = translationLocations[i];
-      final String[] plural = findPlural(translationLocation, id);
+    for (int i = headerLocations.length - 1; i >= 0; i--) {
+      final String[] plural = findPlural(headerLocations[i], id);
       if (plural != null) {
         plurals.put(id, plural);
         return plural;
@@ -280,7 +264,7 @@ public class ParsedStringPack {
 
   public boolean isEmpty() {
     // TODO(roozbehp): Investigate if we need to be more conservative and actually check for data.
-    return translationLocations.length == 0;
+    return headerLocations.length == 0;
   }
 
   @Nullable
