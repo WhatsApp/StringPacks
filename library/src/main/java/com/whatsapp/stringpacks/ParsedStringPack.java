@@ -168,20 +168,22 @@ public class ParsedStringPack {
               numStrings));
       return null;
     }
-    // TODO(roozbehp):
-    // Replace this linear search with a binary search after making sure the IDs are sorted when
-    // packing the strings.
-    for (int i = 0; i < numStrings; i++) {
-      if (read16BitsFrom(caret) == id) {
-        caret += 2;
-        final int stringStart = read32BitsFrom(caret);
-        caret += 4;
-        final int stringLen = read16BitsFrom(caret);
-        return new String(input, startOfStringData + stringStart, stringLen, encoding);
+
+    // Binary search for the value of ID.
+    int left = 0;
+    int right = numStrings - 1;
+    while (left <= right) {
+      final int middle = (left + right) / 2;
+      final int middleCaret = caret + 8 * middle;
+      final int middleId = read16BitsFrom(middleCaret);
+      if (middleId < id) {
+        left = middle + 1;
+      } else if (middleId > id) {
+        right = middle - 1;
       } else {
-        // 2 bytes for the string id, 4 bytes for the stringStart, and 2 bytes for the string
-        // length. So we skip 8 bytes altogether.
-        caret += 8;
+        final int stringStart = read32BitsFrom(middleCaret + 2);
+        final int stringLen = read16BitsFrom(middleCaret + 6);
+        return new String(input, startOfStringData + stringStart, stringLen, encoding);
       }
     }
     // If we are here, we didn't find the string ID.
@@ -208,8 +210,8 @@ public class ParsedStringPack {
     // Skip the information for all normal (non-plural) strings, which we don't need.
     caret += 8 * numStrings;
     // TODO(roozbehp):
-    // Replace this linear search with a binary search after making sure the IDs are sorted when
-    // packing the strings.
+    // The present plural format is not binary-search friendly for plurals. Change the binary
+    // format and make this a binary search.
     for (int i = 0; i < numPlurals; i++) {
       final int pluralId = read16BitsFrom(caret);
       caret += 2;
