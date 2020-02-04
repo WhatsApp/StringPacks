@@ -2,10 +2,12 @@
 
 StringPacks is a library to store translation strings in a more efficient binary format for Android applications, so that it reduces the Android APK size.
 
+Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/npnamYPQD3g?t=812) to know more about the motivation, architecture and prospect of the StringPacks project.
+
 ## Requirements
 
 - **Python 3** - The StringPacks python scripts are written in Python 3.
-- **minSdkVersion 15** - The library default min sdk version is 15, but it should work for lower SDK verions.
+- **minSdkVersion 15** - The library default min sdk version is 15, but it should work for lower SDK versions.
 - **Git** - The script uses `git ls-files` to look up files.
 - **Android development environment**
 - **Gradle Build System**
