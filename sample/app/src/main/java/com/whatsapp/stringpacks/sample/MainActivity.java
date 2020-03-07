@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
         // Need this to force reset the locale
         StringPacks.getInstance().setUp(getBaseContext());
 
-        ((TextView) findViewById(R.id.text_view)).setText(getBaseContext().getString(R.string.hello_world));
+        ((TextView) findViewById(R.id.text_view)).setText(R.string.hello_world);
         Spinner spinner = findViewById(R.id.language_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.languages, android.R.layout.simple_spinner_item);

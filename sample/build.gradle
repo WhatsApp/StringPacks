@@ -27,7 +27,7 @@ allprojects {
 }
 
 ext {
-    stringPacksConfigFile = "$rootDir/app/string-packs/config.json"
+//    stringPacksConfigFile = "$rootDir/app/string-packs/config.json"
 }
 
 task clean(type: Delete) {
