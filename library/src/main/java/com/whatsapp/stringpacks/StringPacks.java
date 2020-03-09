@@ -56,10 +56,14 @@ public class StringPacks {
 
   /** Set up the library with latest locale at the start of the app, or on a locale change */
   public void setUp(@NonNull Context context) {
-    appRes = resolveResources(context);
+    // Read locale from context instead of appRes in case there is an overridden custom locale.
+    final Locale locale = getLocaleFromContext(context.getResources());
 
-    final Locale locale = getLocaleFromContext(appRes);
+    // TODO: Don't re-setup if the new locale is the same as the previous one.
+
     final boolean useStringPack = !useSystemResources(locale);
+
+    appRes = resolveResources(context);
 
     synchronized (stringPackLock) {
       if (useStringPack) {

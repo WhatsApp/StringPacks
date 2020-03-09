@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">StringPacks</string>
     <string name="hello_world">Hello World!</string>
-    <string-array name="languages">
-        <item>en</item>
-        <item>fr</item>
-        <item>es</item>
-        <item>zh</item>
+
+    <string-array name="language_tags">
         <item>ar</item>
+        <item>en</item>
+        <item>es</item>
+        <item>fr</item>
+        <item>zh</item>
     </string-array>
 </resources>
