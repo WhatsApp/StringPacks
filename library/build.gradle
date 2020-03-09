@@ -29,6 +29,8 @@ if (hasProperty('stringPacksConfigFile')) {
 
     def packScript = "$projectDir/scripts/pack_strings.py"
 
+    def assetsDir = "$rootDir/${spConfig.assets_directory}"
+
     tasks.register('generateStringPacks', Exec) {
         workingDir "$rootDir"
 
@@ -36,7 +38,7 @@ if (hasProperty('stringPacksConfigFile')) {
         inputs.file("$rootDir/${spConfig.pack_ids_class_file_path}")
         inputs.file(packScript)
 
-        outputs.dir('src/main/assets')
+        outputs.dir(assetsDir)
 
         commandLine 'python3', packScript, '--config', configFile.path
     }
@@ -45,5 +47,9 @@ if (hasProperty('stringPacksConfigFile')) {
         if (task.name =~ /^generate.*Assets$/) {
             task.dependsOn generateStringPacks
         }
+    }
+
+    clean.doFirst {
+        delete fileTree(assetsDir).include("strings_*.pack")
     }
 }
