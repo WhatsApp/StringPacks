@@ -18,12 +18,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class ParsedStringPack {
-  @NonNull private SparseArray<String> strings = new SparseArray<>();
-  @NonNull private SparseArray<String[]> plurals = new SparseArray<>();
-  private int startOfStringData;
-  private Charset encoding;
-  @NonNull private final byte[] input;
-  private int[] headerLocations;
+
+  private static final int KIBIBYTE = 1024; // 2^10
+  private static final int LOCALE_CODE_SIZE = 7;
+  private static final int HEADER_SIZE = 11;
 
   private static final Charset ASCII = Charset.forName("US-ASCII");
 
@@ -32,10 +30,15 @@ public class ParsedStringPack {
     Charset.forName("UTF-8"), Charset.forName("UTF-16BE")
   };
 
-  private static final int LOCALE_CODE_SIZE = 7;
-  private static final int KIBIBYTE = 1024;
+  @NonNull private final byte[] input;
 
-  private static final int HEADER_SIZE = 11;
+  @NonNull private SparseArray<String> strings = new SparseArray<>();
+  @NonNull private SparseArray<String[]> plurals = new SparseArray<>();
+
+  private Charset encoding;
+  private int[] headerLocations; // locations of matched locales' headers
+
+  private int startOfStringData;
 
   public ParsedStringPack(@NonNull InputStream inputStream, @NonNull List<String> parentLocales) {
     final byte[] byteArray = byteArrayFromInputStream(inputStream);
@@ -309,6 +312,7 @@ public class ParsedStringPack {
       // It doesn't exist.
       return null;
     }
+    // TODO: pluralRules only accept Strings or Longs, we need to convert `quantity` type if needed.
     final int index = quantityIndex(pluralRules.quantityForNumber(quantity));
     String result = plural[index];
     if (result != null) {
