@@ -7,8 +7,8 @@
 import groovy.json.JsonSlurper
 
 // Provide gradle script in project root directory to customize the build variants.
-if (file("$rootDir/android-library-config.gradle").exists()) {
-    apply from: "$rootDir/android-library-config.gradle"
+if (file("$rootDir/gradle/android-library-config.gradle").exists()) {
+    apply from: "$rootDir/gradle/android-library-config.gradle"
 } else {
     apply from: "android-library-config.gradle"
 }
