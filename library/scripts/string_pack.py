@@ -186,7 +186,8 @@ class LocaleStore(object):
         blob = bytearray()
         blob_append_16_bit(blob, len(self.strings))
         blob_append_16_bit(blob, len(self.plurals))
-        # Write the strings
+        # Write the strings. Note that the parser in ParsedStringPack.java expects this to be
+        # sorted by ID.
         for id in sorted(self.strings):
             blob_append_16_bit(blob, id)
             start, length = self.strings[id]
