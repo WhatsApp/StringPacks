@@ -6,7 +6,6 @@
 
 package com.whatsapp.stringpacks;
 
-import android.util.SparseArray;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,8 +32,8 @@ public class ParsedStringPack {
 
   @NonNull private final byte[] input;
 
-  @NonNull private SparseArray<String> strings = new SparseArray<>();
-  @NonNull private SparseArray<String[]> plurals = new SparseArray<>();
+  @NonNull private ConcurrentHashMap<Integer, String> strings = new ConcurrentHashMap<>();
+  @NonNull private ConcurrentHashMap<Integer, String[]> plurals = new ConcurrentHashMap<>();
 
   private Charset encoding;
   private int[] headerLocations; // locations of matched locales' headers
