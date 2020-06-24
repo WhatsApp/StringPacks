@@ -6,6 +6,16 @@
 
 package com.whatsapp.stringpacks;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +26,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParsedStringPackTest {
@@ -44,7 +55,8 @@ public class ParsedStringPackTest {
       };
 
   private static int PLURALS_ID = 0;
-  private static int STRING_ID = 1;
+  private static int STRING_ID = 15;
+  private static String[] EXPECTED_STRINGS = {null, "你好非洲", "南极洲你好", "你好北冰洋", "你好亚洲", "你好大西洋", "澳大利亚你好", "您好欧洲", "你好森林", "你好印度洋", "你好山", "你好，北美", "你好太平洋", "你好河", "您好，南美", "你好，世界"};
 
   private ParsedStringPack parsedStringPack;
 
@@ -71,7 +83,7 @@ public class ParsedStringPackTest {
 
   @Test
   public void getString_WithNonexistentId() {
-    String nonexistent = parsedStringPack.getString(2);
+    String nonexistent = parsedStringPack.getString(EXPECTED_STRINGS.length + 1);
     assertNull(nonexistent);
   }
 
@@ -81,6 +93,114 @@ public class ParsedStringPackTest {
     for (int i = 0; i < expectedQuantityStrings.length; i++) {
       String string = parsedStringPack.getQuantityString(PLURALS_ID, (long) i, TEST_PLURAL_RULES);
       assertEquals(expectedQuantityStrings[i], string);
+    }
+  }
+
+  @Test
+  public void getString_onDemandLoadingSameString_calledFromMultipleThreads() throws InterruptedException {
+    int numberOfThreads = 100;
+    String expected = "你好，世界";
+    ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+    CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+    Callable<String> getStringTask = () -> {
+      String string = parsedStringPack.getString(STRING_ID);
+      latch.countDown();
+      return string;
+    };
+    List<Callable<String>> tasks = new ArrayList<>();
+    for (int i = 0; i < numberOfThreads; i++) {
+      tasks.add(getStringTask);
+    }
+    List<Future<String>> results = service.invokeAll(tasks, 2, TimeUnit.SECONDS);
+    latch.await();
+    // To allow any remaining tasks to return their result since latch.countDown happened before
+    // returning the string
+    Thread.sleep(2000);
+    for (int i = 0; i < numberOfThreads; i++) {
+      Future<String> result = results.get(i);
+      assertTrue(!result.isCancelled());
+      try {
+        assertEquals("Problem fetching correct string", expected, result.get());
+      } catch (ExecutionException ee) {
+        assertTrue("Exception when fetching string " + ee.toString(), false);
+      }
+    }
+  }
+
+  @Test
+  public void getString_onDemandLoadingMultipleStrings_calledFromMultipleThreads() throws InterruptedException {
+    int numberOfThreads = 100;
+    int numStringToCall = EXPECTED_STRINGS.length;
+    ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+    CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+    List<Callable<List<String>>> tasks = new ArrayList<>();
+    Random random = new Random();
+    for (int i = 0; i < numberOfThreads; i++) {
+      final int nextRandomNumber = random.nextInt(numStringToCall - 1) + 1;
+      // Add tasks to be called
+      tasks.add(() -> {
+        List<String> outcome = new ArrayList<>();
+        outcome.add(EXPECTED_STRINGS[nextRandomNumber]);
+        outcome.add(parsedStringPack.getString(nextRandomNumber));
+        latch.countDown();
+        return outcome;
+      });
+    }
+    List<Future<List<String>>> results = service.invokeAll(tasks, 5, TimeUnit.SECONDS);
+    latch.await();
+    // To allow any remaining tasks to return their result since latch.countDown happened before
+    // returning the string
+    Thread.sleep(2000);
+    for (int i = 0; i < numberOfThreads; i++) {
+      Future<List<String>> result = results.get(i);
+      assertTrue(!result.isCancelled());
+      try {
+        List<String> output = result.get();
+        assertEquals("Problem fetching correct string", output.get(0), output.get(1));
+      } catch (ExecutionException ee) {
+        assertTrue("Exception when fetching string " + ee.toString(), false);
+      }
+    }
+  }
+
+  @Test
+  public void getQuantityString_onDemandLoading_calledFromMultipleThreads() throws InterruptedException {
+    int numberOfThreads = 100;
+    String[] expected = {"零个", "一个", "两个", "少许", "多数", "其他"};
+    int numQuantityStrings = expected.length;
+    ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+    CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+    Callable<String[]> getQuantityStringTask = () -> {
+      String[] result = new String[numQuantityStrings];
+      for (int i = 0; i < numQuantityStrings; i++) {
+        result[i] = parsedStringPack.getQuantityString(PLURALS_ID, (long) i, TEST_PLURAL_RULES);
+      }
+      latch.countDown();
+      return result;
+    };
+    List<Callable<String[]>> tasks = new ArrayList<>();
+    for (int i = 0; i < numberOfThreads; i++) {
+      tasks.add(getQuantityStringTask);
+    }
+    List<Future<String[]>> results = service.invokeAll(tasks, 2, TimeUnit.SECONDS);
+    latch.await();
+    // To allow any remaining tasks to return their result since latch.countDown happened before
+    // returning the string
+    Thread.sleep(2000);
+    for (int i = 0; i < numberOfThreads; i++) {
+      Future<String[]> result = results.get(i);
+      assertTrue(!result.isCancelled());
+      try {
+        String[] actual = result.get();
+        for (int j = 0; j < numQuantityStrings; j++) {
+          assertEquals("Correct plural not fetched", expected[j], actual[j]);
+        }
+      } catch (ExecutionException ee) {
+        assertTrue("Exception when fetching plurals " + ee.toString(), false);
+      }
     }
   }
 }
