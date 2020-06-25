@@ -15,15 +15,33 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
 
 ## Setup in Android Project
 
-1. Copy the [library/](library/) directory from this project to the root directory of your Android project.
-    - **Rename the directory to `stringpacks` to make it more clear and avoid naming conflicts.**.
+1. Copy the [scripts/](library/scripts/) and [pack.gradle](library/pack.gradle) from `library/` to the root directory of your Android project.
 2. Move either [Java](library/templates/StringPackIds.java) or [Kotlin](library/templates/StringPackIds.kt) version of `StringPackIds` file from [templates/](library/templates/) directory to your project source code directory.
     - Edit package information of the file.
 3. Move [template config.json](library/templates/config.json) to your Android application project directory.
     - Replace `{app}` to be your application project directory name.
     - Point `pack_ids_class_file_path` to the path where you put the `StringPackIds` file.
-4. Include this library to your Android Project by adding `include ':stringpacks'` to the `settings.gradle` file.
-5. Add `implementation project(':stringpacks')` to `dependencies{ }` block of the `build.gradle` file in your application project.
+4. Include `mavenCentral()` under `repositories` in your Android project's `build.gradle`.
+   ```
+   allprojects {
+     
+     repositories {
+       ...
+       mavenCentral()
+    }
+    ...
+   }
+   ```
+5. Make following changes to your Android application's `build.gradle`
+   ```
+   apply from: "$rootDir/pack.gradle"
+   
+   dependencies {
+     ...
+     ...
+     implementation 'com.whatsapp.stringpacks:stringpacks:0.1.0'
+   }
+   ```
 
 You now have StringPacks available in your Android project.
 
@@ -89,7 +107,7 @@ The mapping information would also be used for generating the `.pack` files, so 
 
 Execute the python script from your project root directory to assemble the string packs:
 ```bash
-python3 ./stringpacks/scripts/assemble_string_packs.py --config ./{path_to}/config.json
+python3 ./scripts/assemble_string_packs.py --config ./{path_to}/config.json
 ```
 
 You will see:
