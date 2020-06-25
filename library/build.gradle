@@ -6,6 +6,8 @@
 
 import groovy.json.JsonSlurper
 
+apply from: 'release.gradle'
+
 // Provide gradle script in project root directory to customize the build variants.
 if (file("$rootDir/gradle/android-library-config.gradle").exists()) {
     apply from: "$rootDir/gradle/android-library-config.gradle"
@@ -20,7 +22,6 @@ dependencies {
     testImplementation "junit:junit:4.12"
     testImplementation "org.robolectric:robolectric:4.2.1"
 }
-
 
 // Register task to generate string pack files.
 if (hasProperty('stringPacksConfigFile')) {
