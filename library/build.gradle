@@ -4,8 +4,6 @@
  * the LICENSE file in the root directory of this source tree.
  */
 
-import groovy.json.JsonSlurper
-
 apply from: 'release.gradle'
 
 // Provide gradle script in project root directory to customize the build variants.
@@ -23,34 +21,3 @@ dependencies {
     testImplementation "org.robolectric:robolectric:4.2.1"
 }
 
-// Register task to generate string pack files.
-if (hasProperty('stringPacksConfigFile')) {
-    def configFile = file(property('stringPacksConfigFile'))
-    def spConfig = new JsonSlurper().parse(configFile)
-
-    def packScript = "$projectDir/scripts/pack_strings.py"
-
-    def assetsDir = "$rootDir/${spConfig.assets_directory}"
-
-    tasks.register('generateStringPacks', Exec) {
-        workingDir "$rootDir"
-
-        inputs.dir(fileTree("$rootDir/${spConfig.packable_strings_directory}"))
-        inputs.file("$rootDir/${spConfig.pack_ids_class_file_path}")
-        inputs.file(packScript)
-
-        outputs.dir(assetsDir)
-
-        commandLine 'python3', packScript, '--config', configFile.path
-    }
-
-    tasks.whenTaskAdded { task ->
-        if (task.name =~ /^generate.*Assets$/) {
-            task.dependsOn generateStringPacks
-        }
-    }
-
-    clean.doFirst {
-        delete fileTree(assetsDir).include("strings_*.pack")
-    }
-}

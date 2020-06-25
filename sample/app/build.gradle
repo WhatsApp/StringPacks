@@ -6,6 +6,8 @@
 
 apply plugin: 'com.android.application'
 
+apply from: "$rootDir/../library/pack.gradle"
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -35,7 +37,7 @@ android {
 }
 
 dependencies {
-    implementation project(':library')
+    implementation "com.whatsapp.stringpacks:stringpacks:$LIBRARY_VERSION_NAME"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }
