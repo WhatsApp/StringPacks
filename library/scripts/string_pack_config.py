@@ -84,6 +84,7 @@ class StringPackConfig:
         "assets_directory",
         "pack_ids_class_file_path",
         "pack_id_mapping",
+        "pack_scripts_directory",
     ]
 
     def __init__(self):
@@ -121,6 +122,9 @@ class StringPackConfig:
         # For example, it may save space to pack Czech and Slovak in one pack file, assuming the app knows where to
         # look for them.
         self.pack_id_mapping = {}
+
+        # The directory that holds all the python scripts
+        self.pack_scripts_directory = None
 
     def load_from_file(self, config_json_file_path):
         """Load configuration from json file."""

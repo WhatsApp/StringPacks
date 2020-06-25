@@ -11,7 +11,7 @@ if (hasProperty('stringPacksConfigFile')) {
     def configFile = file(property('stringPacksConfigFile'))
     def spConfig = new JsonSlurper().parse(configFile)
 
-    def packScript = "$rootDir/../library/scripts/pack_strings.py"
+    def packScript = "$rootDir/${spConfig.pack_scripts_directory}/pack_strings.py"
 
     def assetsDir = "$rootDir/${spConfig.assets_directory}"
 

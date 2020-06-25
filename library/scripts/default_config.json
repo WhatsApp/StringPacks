@@ -9,5 +9,6 @@
   ],
   "languages_to_pack": ["*"],
   "languages_to_drop": [],
-  "pack_id_mapping": {}
+  "pack_id_mapping": {},
+  "pack_scripts_directory": "scripts/"
 }
