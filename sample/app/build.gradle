@@ -37,7 +37,9 @@ android {
 }
 
 dependencies {
-    implementation 'com.whatsapp.stringpacks:stringpacks:0.1.0'
+    // Uncomment it for testing when a new version is published to maven
+    // implementation 'com.whatsapp.stringpacks:stringpacks:0.1.0'
+    implementation project(':library')
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }
