@@ -267,7 +267,7 @@ public class ParsedStringPack {
 
   public boolean isEmpty() {
     // TODO(roozbehp): Investigate if we need to be more conservative and actually check for data.
-    return headerLocations.length == 0;
+    return headerLocations == null || headerLocations.length == 0;
   }
 
   @Nullable
