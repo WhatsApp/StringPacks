@@ -4,6 +4,7 @@
 # the LICENSE file in the root directory of this source tree.
 
 import collections
+import os
 import re
 import sys
 from xml.etree import ElementTree
@@ -25,7 +26,8 @@ def normalize_locale(android_config_name):
 
 
 def extract_locale_from_file_name(file_name):
-    match = re.search("/values-(.*)/", file_name)
+    escaped_sep = re.escape(os.path.sep)
+    match = re.search(escaped_sep + "values-(.*)" + escaped_sep, file_name)
     assert match is not None
     return normalize_locale(match.group(1))
 
