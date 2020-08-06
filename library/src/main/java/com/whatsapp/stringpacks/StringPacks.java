@@ -128,9 +128,9 @@ public class StringPacks {
       if (parsedStringPack != null) {
         if (isPlural) {
           // TODO better fix for the int / long interfaces.
-          translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules);
+          translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, false);
         } else {
-          translation = parsedStringPack.getString(location);
+          translation = parsedStringPack.getString(location, false);
         }
       }
     }
@@ -153,7 +153,7 @@ public class StringPacks {
     ParsedStringPack result = null;
     try (InputStream inputStream = context.getAssets().open(fileName)) {
       final List<String> parentLocales = getParentLocales(locale);
-      result = new ParsedStringPack(inputStream, parentLocales);
+      result = new ParsedStringPack(inputStream, parentLocales, null);
     } catch (IOException exception) {
       SpLog.e("translations/loadData error:" + exception);
     }
