@@ -6,6 +6,12 @@
 
 package com.whatsapp.stringpacks;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -29,7 +35,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
-public class ParsedStringPackTest {
+public class LoadedStringPackTest {
 
   private static final PluralRules TEST_PLURAL_RULES =
       new PluralRules() {
@@ -62,7 +68,8 @@ public class ParsedStringPackTest {
 
   @Before
   public void setUp() {
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh.pack");
+    InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("strings_zh.pack");
     parsedStringPack = new ParsedStringPack(inputStream, Collections.singletonList("zh"));
   }
 
@@ -97,7 +104,8 @@ public class ParsedStringPackTest {
   }
 
   @Test
-  public void getString_onDemandLoadingSameString_calledFromMultipleThreads() throws InterruptedException {
+  public void getString_onDemandLoadingSameString_calledFromMultipleThreads()
+      throws InterruptedException {
     int numberOfThreads = 100;
     String expected = "你好，世界";
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
@@ -129,7 +137,8 @@ public class ParsedStringPackTest {
   }
 
   @Test
-  public void getString_onDemandLoadingMultipleStrings_calledFromMultipleThreads() throws InterruptedException {
+  public void getString_onDemandLoadingMultipleStrings_calledFromMultipleThreads()
+      throws InterruptedException {
     int numberOfThreads = 100;
     int numStringToCall = EXPECTED_STRINGS.length;
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
@@ -166,7 +175,8 @@ public class ParsedStringPackTest {
   }
 
   @Test
-  public void getQuantityString_onDemandLoading_calledFromMultipleThreads() throws InterruptedException {
+  public void getQuantityString_onDemandLoading_calledFromMultipleThreads()
+      throws InterruptedException {
     int numberOfThreads = 100;
     String[] expected = {"零个", "一个", "两个", "少许", "多数", "其他"};
     int numQuantityStrings = expected.length;

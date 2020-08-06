@@ -7,6 +7,7 @@
 package com.whatsapp.stringpacks;
 
 import androidx.collection.ArraySet;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 public class StringPackData {
@@ -40,4 +41,16 @@ public class StringPackData {
               REGION_SAO_TOME_AND_PRINCIPE,
               REGION_SWITZERLAND,
               REGION_TIMOR_LESTE));
+
+  static final int LOCALE_CODE_SIZE = 7;
+  static final int HEADER_SIZE = 11;
+
+  @SuppressWarnings("CharsetObjectCanBeUsed")
+  static final Charset ASCII = Charset.forName("US-ASCII");
+
+  // Keep in sync with `_ENCODING_ID` in string_pack.py
+  @SuppressWarnings("CharsetObjectCanBeUsed")
+  static final Charset[] ENCODINGS = {
+      Charset.forName("UTF-8"), Charset.forName("UTF-16BE")
+  };
 }
