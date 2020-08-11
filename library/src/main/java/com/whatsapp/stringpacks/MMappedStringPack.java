@@ -140,7 +140,7 @@ public class MMappedStringPack {
     if (position == 0) {
       return null;
     }
-    mappedByteBuffer.position(stringSparseArray.get(id));
+    mappedByteBuffer.position(position);
     int caret = mappedByteBuffer.position();
     final int stringStart = read32BitsFrom(caret);
     caret += 4; //Increment to 4 Bytes which we read above for string starting location
@@ -152,7 +152,11 @@ public class MMappedStringPack {
   }
 
   public synchronized String[] loadPlural(int id) {
-    mappedByteBuffer.position(pluralSparseArray.get(id));
+    int position = pluralSparseArray.get(id);
+    if (position == 0) {
+      return null;
+    }
+    mappedByteBuffer.position(position);
     int caret = mappedByteBuffer.position();
     final int quantityCount = mappedByteBuffer.get(caret);
     caret++; // Increment by a single byte which are for quantity count

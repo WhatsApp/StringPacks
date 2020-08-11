@@ -86,6 +86,17 @@ public class MMappedStringPackTest {
   }
 
   @Test
+  public void getPlural_WithNonexistentId() {
+    String nonexistentMMapped =
+        parsedStringPack.getQuantityString(
+            StringPacksTestData.PLURALS_ID + 1,
+            2,
+            StringPacksTestData.TEST_PLURAL_RULES,
+            true);
+    assertNull(nonexistentMMapped);
+  }
+
+  @Test
   public void getPlurals_WithTestPluralRules() {
     String[] expectedQuantityStrings = {"零个", "一个", "两个", "少许", "多数", "其他"};
     for (int i = 0; i < expectedQuantityStrings.length; i++) {
