@@ -6,6 +6,7 @@
 
 package com.whatsapp.stringpacks;
 
+import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -24,6 +25,7 @@ public class ParsedStringPack {
   @NonNull
   private final LoadedStringPack loadedStringPack;
   @Nullable
+  @SuppressLint("HungarianNotation")
   private MMappedStringPack mMappedStringPack;
 
   public ParsedStringPack(
