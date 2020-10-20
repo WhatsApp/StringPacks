@@ -22,8 +22,8 @@ public class ParsedStringPack {
   @NonNull
   private final ConcurrentHashMap<Integer, String[]> plurals = new ConcurrentHashMap<>();
 
-  @NonNull
-  private final LoadedStringPack loadedStringPack;
+  @Nullable
+  private LoadedStringPack loadedStringPack = null;
   @Nullable
   @SuppressLint("HungarianNotation")
   private MMappedStringPack mMappedStringPack;
@@ -32,9 +32,10 @@ public class ParsedStringPack {
       @NonNull InputStream inputStream,
       @NonNull List<String> parentLocales,
       @Nullable MappedByteBuffer mappedPackFile) {
-    loadedStringPack = new LoadedStringPack(inputStream, parentLocales);
     if (mappedPackFile != null) {
       mMappedStringPack = new MMappedStringPack(parentLocales, mappedPackFile);
+    } else {
+      loadedStringPack = new LoadedStringPack(inputStream, parentLocales);
     }
   }
 
@@ -42,7 +43,10 @@ public class ParsedStringPack {
     if (mMappedStringPack != null) {
       return mMappedStringPack.isEmpty();
     }
-    return loadedStringPack.isEmpty();
+    if (loadedStringPack != null) {
+      return loadedStringPack.isEmpty();
+    }
+    return true;
   }
 
   @Nullable
@@ -51,11 +55,11 @@ public class ParsedStringPack {
     if (result != null) {
       return result;
     }
-      // String not loaded or doesn't exist.
+    // String not loaded or doesn't exist.
     String loadedString = null;
     if (readFromMMap && mMappedStringPack != null) {
-        loadedString = mMappedStringPack.loadString(id);
-    } else { 
+      loadedString = mMappedStringPack.loadString(id);
+    } else if (loadedStringPack != null) {
       loadedString = loadedStringPack.loadString(id);
     }
     if (loadedString != null) {
@@ -90,7 +94,7 @@ public class ParsedStringPack {
       String[] loadedPlural = null;
       if (readFromMMap && mMappedStringPack != null) {
         loadedPlural = mMappedStringPack.loadPlural(id);
-      } else {
+      } else if (loadedStringPack != null) {
         loadedPlural = loadedStringPack.loadPlural(id);
       }
       if (loadedPlural != null) {
