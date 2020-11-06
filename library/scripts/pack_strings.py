@@ -9,6 +9,7 @@ import argparse
 import collections
 import glob
 import logging
+import multiprocessing
 import os
 import re
 
@@ -72,15 +73,33 @@ def pack_strings(sp_config, plural_handler):
     # Create assets directory in case it does not exist.
     os.makedirs(sp_config.assets_directory, exist_ok=True)
 
-    for pack_id in sorted(grouped_strings_file_paths):
+    PackBuilder(
+        sp_config, grouped_strings_file_paths, id_finder, plural_handler
+    ).build()
+
+
+class PackBuilder(object):
+    def __init__(
+        self, sp_config, grouped_strings_file_paths, id_finder, plural_handler
+    ):
+        self.sp_config = sp_config
+        self.grouped_strings_file_paths = grouped_strings_file_paths
+        self.id_finder = id_finder
+        self.plural_handler = plural_handler
+
+    def build(self):
+        with multiprocessing.Pool() as pool:
+            pool.map(self.build_impl, sorted(self.grouped_strings_file_paths))
+
+    def build_impl(self, pack_id):
         logging.info("Packing: " + pack_id)
-        string_resources_file_paths = grouped_strings_file_paths[pack_id]
+        string_resources_file_paths = self.grouped_strings_file_paths[pack_id]
 
         string_pack.build(
             string_resources_file_paths,
-            get_dest_pack_file_path(sp_config, pack_id),
-            id_finder,
-            plural_handler,
+            get_dest_pack_file_path(self.sp_config, pack_id),
+            self.id_finder,
+            self.plural_handler,
         )
 
 
