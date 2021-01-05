@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import com.whatsapp.stringpacks.StringPackContext;
 
 public class MainActivity extends Activity {
@@ -35,28 +34,27 @@ public class MainActivity extends Activity {
   private void setupLanguageSelector() {
     Spinner spinner = findViewById(R.id.language_spinner);
     // TODO: display language full name instead of language code
-    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-      R.array.language_tags, android.R.layout.simple_spinner_item);
+    ArrayAdapter<CharSequence> adapter =
+        ArrayAdapter.createFromResource(
+            this, R.array.language_tags, android.R.layout.simple_spinner_item);
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     spinner.setAdapter(adapter);
     // TODO: set selection to be current system language
 
-    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        changeLanguage(parent.getItemAtPosition(pos).toString());
-      }
+    spinner.setOnItemSelectedListener(
+        new AdapterView.OnItemSelectedListener() {
+          public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+            changeLanguage(parent.getItemAtPosition(pos).toString());
+          }
 
-      public void onNothingSelected(AdapterView<?> parent) {
-      }
-    });
-
+          public void onNothingSelected(AdapterView<?> parent) {}
+        });
   }
 
   @Override
   protected void attachBaseContext(Context base) {
     super.attachBaseContext(StringPackContext.wrap(base));
   }
-
 
   private void changeLanguage(String languageTag) {
     LocaleUtil.overrideCustomLanguage(this, languageTag);

@@ -50,7 +50,5 @@ public class StringPackData {
 
   // Keep in sync with `_ENCODING_ID` in string_pack.py
   @SuppressWarnings("CharsetObjectCanBeUsed")
-  static final Charset[] ENCODINGS = {
-      Charset.forName("UTF-8"), Charset.forName("UTF-16BE")
-  };
+  static final Charset[] ENCODINGS = {Charset.forName("UTF-8"), Charset.forName("UTF-16BE")};
 }

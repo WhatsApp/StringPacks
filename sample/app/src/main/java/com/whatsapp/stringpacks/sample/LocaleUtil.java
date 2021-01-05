@@ -26,7 +26,7 @@ public class LocaleUtil {
       final Resources res = context.getResources();
       final Configuration config = res.getConfiguration();
 
-      config.locale =  new Locale(languageTag);
+      config.locale = new Locale(languageTag);
       res.updateConfiguration(config, res.getDisplayMetrics());
 
       overriddenContext = context;

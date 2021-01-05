@@ -11,11 +11,12 @@ import com.whatsapp.stringpacks.StringPacks;
 public class StringPackIds {
 
   public static void registerStringPackIds() {
-    StringPacks.getInstance().register(
-        new int[] {
-            // region StringPacks ID Map
-          R.string.hello_world, 0,
-            // endregion
-        });
+    StringPacks.getInstance()
+        .register(
+            new int[] {
+              // region StringPacks ID Map
+              R.string.hello_world, 0,
+              // endregion
+            });
   }
 }

@@ -9,21 +9,18 @@ package com.whatsapp.stringpacks;
 import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import java.io.InputStream;
 import java.nio.MappedByteBuffer;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ParsedStringPack {
 
-  @NonNull
-  private final ConcurrentHashMap<Integer, String> strings = new ConcurrentHashMap<>();
-  @NonNull
-  private final ConcurrentHashMap<Integer, String[]> plurals = new ConcurrentHashMap<>();
+  @NonNull private final ConcurrentHashMap<Integer, String> strings = new ConcurrentHashMap<>();
+  @NonNull private final ConcurrentHashMap<Integer, String[]> plurals = new ConcurrentHashMap<>();
 
-  @Nullable
-  private LoadedStringPack loadedStringPack = null;
+  @Nullable private LoadedStringPack loadedStringPack = null;
+
   @Nullable
   @SuppressLint("HungarianNotation")
   private MMappedStringPack mMappedStringPack;
@@ -87,7 +84,8 @@ public class ParsedStringPack {
   }
 
   @Nullable
-  public String getQuantityString(int id, Object quantity, @NonNull PluralRules pluralRules, final boolean readFromMMap) {
+  public String getQuantityString(
+      int id, Object quantity, @NonNull PluralRules pluralRules, final boolean readFromMMap) {
     String[] plural = plurals.get(id);
     if (plural == null) {
       // Plural set not loaded or doesn't exist.

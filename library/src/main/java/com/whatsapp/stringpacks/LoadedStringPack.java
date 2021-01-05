@@ -11,9 +11,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * This class holds the logic that loads whole string pack content from input stream directly.
- */
+/** This class holds the logic that loads whole string pack content from input stream directly. */
 class LoadedStringPack {
   private static final int KIBIBYTE = 1024; // 2^10
 
@@ -22,9 +20,7 @@ class LoadedStringPack {
   private int startOfStringData;
   private int[] headerLocations; // locations of matched locales' headers
 
-  public LoadedStringPack (
-      @NonNull InputStream inputStream,
-      @NonNull List<String> parentLocales) {
+  public LoadedStringPack(@NonNull InputStream inputStream, @NonNull List<String> parentLocales) {
 
     final byte[] byteArray = byteArrayFromInputStream(inputStream);
     if (byteArray == null) {

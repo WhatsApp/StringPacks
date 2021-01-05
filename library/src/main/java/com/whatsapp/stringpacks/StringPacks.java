@@ -128,7 +128,8 @@ public class StringPacks {
       if (parsedStringPack != null) {
         if (isPlural) {
           // TODO better fix for the int / long interfaces.
-          translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, false);
+          translation =
+              parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, false);
         } else {
           translation = parsedStringPack.getString(location, false);
         }

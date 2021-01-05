@@ -3,27 +3,23 @@ package com.whatsapp.stringpacks;
 import android.util.SparseIntArray;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
-/**
- * Class that holds logic for MMapped string pack
- */
+/** Class that holds logic for MMapped string pack */
 public class MMappedStringPack {
 
   private final MappedByteBuffer mappedByteBuffer;
   private final Charset encoding;
   private final int startOfStringData;
 
-  //The following arrays store the id->location data for strings and plurals
+  // The following arrays store the id->location data for strings and plurals
   private final SparseIntArray pluralSparseArray = new SparseIntArray();
   private final SparseIntArray stringSparseArray = new SparseIntArray();
 
-  public MMappedStringPack (
-      @NonNull List<String> parentLocales,
-      @NonNull MappedByteBuffer mappedPackFile) {
+  public MMappedStringPack(
+      @NonNull List<String> parentLocales, @NonNull MappedByteBuffer mappedPackFile) {
     mappedByteBuffer = mappedPackFile;
 
     final int numLocales = read16BitsFrom(0);
@@ -68,7 +64,7 @@ public class MMappedStringPack {
       mappedByteBuffer.position(translationLocation + StringPackData.LOCALE_CODE_SIZE);
       headerStart = read32BitsFrom(mappedByteBuffer.position());
 
-      //We will map the translation location here from less specific to more specific
+      // We will map the translation location here from less specific to more specific
       mapTranslations(startOfLocaleData, headerStart);
     }
   }
@@ -103,6 +99,7 @@ public class MMappedStringPack {
 
   /**
    * Maps the id -> location for strings and plurals.
+   *
    * @param startOfLocaleData
    * @param headerStart
    */
@@ -118,7 +115,7 @@ public class MMappedStringPack {
       caret += 2; // Increment by 2 Bytes which is the id of the string read above
       stringSparseArray.append(id, caret);
       caret += 6; // Increment by 6 Bytes which is string starting location (4) + string length (2)
-                  // to be read later when string is fetched
+      // to be read later when string is fetched
     }
 
     for (int i = 0; i < numPlurals; i++) {
@@ -129,8 +126,8 @@ public class MMappedStringPack {
       caret++; // Increment by a single byte which are for quantity count read above
       for (int j = 0; j < quantityCount; j++) {
         caret += 7; // Increment by 7 Bytes which is the
-                    // quantity id (1) + string starting location (4) + string length (2) to be
-                    // read later when plural is fetched
+        // quantity id (1) + string starting location (4) + string length (2) to be
+        // read later when plural is fetched
       }
     }
   }
@@ -143,11 +140,11 @@ public class MMappedStringPack {
     mappedByteBuffer.position(position);
     int caret = mappedByteBuffer.position();
     final int stringStart = read32BitsFrom(caret);
-    caret += 4; //Increment to 4 Bytes which we read above for string starting location
+    caret += 4; // Increment to 4 Bytes which we read above for string starting location
     final int stringLen = read16BitsFrom(caret);
     byte[] stringBytes = new byte[stringLen];
     mappedByteBuffer.position(startOfStringData + stringStart);
-    mappedByteBuffer.get(stringBytes,0, stringBytes.length);
+    mappedByteBuffer.get(stringBytes, 0, stringBytes.length);
     return new String(stringBytes, encoding);
   }
 
@@ -170,7 +167,7 @@ public class MMappedStringPack {
       caret += 2; // Increment to 2*8 Bits which we read above for plural length
       byte[] stringBytes = new byte[stringLen];
       mappedByteBuffer.position(startOfStringData + stringStart);
-      mappedByteBuffer.get(stringBytes,0, stringBytes.length);
+      mappedByteBuffer.get(stringBytes, 0, stringBytes.length);
       pluralMMap[quantityId] = new String(stringBytes, 0, stringLen, encoding);
     }
     return pluralMMap;
@@ -179,5 +176,4 @@ public class MMappedStringPack {
   public boolean isEmpty() {
     return stringSparseArray.size() == 0;
   }
-
 }

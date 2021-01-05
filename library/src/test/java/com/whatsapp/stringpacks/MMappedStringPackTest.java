@@ -49,8 +49,7 @@ public class MMappedStringPackTest {
       byte[] bytes = baos.toByteArray();
       RandomAccessFile randomAccessFile =
           new RandomAccessFile(
-              getClass().getClassLoader().getResource("strings_zh.pack").getPath(),
-              "r");
+              getClass().getClassLoader().getResource("strings_zh.pack").getPath(), "r");
       FileChannel fileChannel = randomAccessFile.getChannel();
       MappedByteBuffer mappedByteBuffer =
           fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, bytes.length);
@@ -89,10 +88,7 @@ public class MMappedStringPackTest {
   public void getPlural_WithNonexistentId() {
     String nonexistentMMapped =
         parsedStringPack.getQuantityString(
-            StringPacksTestData.PLURALS_ID + 1,
-            2,
-            StringPacksTestData.TEST_PLURAL_RULES,
-            true);
+            StringPacksTestData.PLURALS_ID + 1, 2, StringPacksTestData.TEST_PLURAL_RULES, true);
     assertNull(nonexistentMMapped);
   }
 
@@ -111,17 +107,19 @@ public class MMappedStringPackTest {
   }
 
   @Test
-  public void getString_onDemandLoadingSameString_calledFromMultipleThreads() throws InterruptedException {
+  public void getString_onDemandLoadingSameString_calledFromMultipleThreads()
+      throws InterruptedException {
     int numberOfThreads = 100;
     String expected = "你好，世界";
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
     CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-    Callable<String> getStringTaskMMap = () -> {
-      String string = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
-      latch.countDown();
-      return string;
-    };
+    Callable<String> getStringTaskMMap =
+        () -> {
+          String string = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
+          latch.countDown();
+          return string;
+        };
     List<Callable<String>> tasksWithMMap = new ArrayList<>();
     for (int i = 0; i < numberOfThreads; i++) {
       tasksWithMMap.add(getStringTaskMMap);
@@ -155,15 +153,17 @@ public class MMappedStringPackTest {
     for (int i = 0; i < numberOfThreads; i++) {
       final int nextRandomNumber = random.nextInt(numStringToCall - 1) + 1;
       // Add tasks to be called
-      tasksWithMMap.add(() -> {
-        List<String> outcome = new ArrayList<>();
-        outcome.add(StringPacksTestData.EXPECTED_STRINGS[nextRandomNumber]);
-        outcome.add(parsedStringPack.getString(nextRandomNumber, true));
-        latch.countDown();
-        return outcome;
-      });
+      tasksWithMMap.add(
+          () -> {
+            List<String> outcome = new ArrayList<>();
+            outcome.add(StringPacksTestData.EXPECTED_STRINGS[nextRandomNumber]);
+            outcome.add(parsedStringPack.getString(nextRandomNumber, true));
+            latch.countDown();
+            return outcome;
+          });
     }
-    List<Future<List<String>>> resultsWithMMap = service.invokeAll(tasksWithMMap, 5, TimeUnit.SECONDS);
+    List<Future<List<String>>> resultsWithMMap =
+        service.invokeAll(tasksWithMMap, 5, TimeUnit.SECONDS);
     latch.await();
     // To allow any remaining tasks to return their result since latch.countDown happened before
     // returning the string
@@ -189,19 +189,20 @@ public class MMappedStringPackTest {
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
     CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-    Callable<String[]> getQuantityStringTaskMMap = () -> {
-      String[] result = new String[numQuantityStrings];
-      for (int i = 0; i < numQuantityStrings; i++) {
-        result[i] =
-            parsedStringPack.getQuantityString(
-                StringPacksTestData.PLURALS_ID,
-                (long) i,
-                StringPacksTestData.TEST_PLURAL_RULES,
-                true);
-      }
-      latch.countDown();
-      return result;
-    };
+    Callable<String[]> getQuantityStringTaskMMap =
+        () -> {
+          String[] result = new String[numQuantityStrings];
+          for (int i = 0; i < numQuantityStrings; i++) {
+            result[i] =
+                parsedStringPack.getQuantityString(
+                    StringPacksTestData.PLURALS_ID,
+                    (long) i,
+                    StringPacksTestData.TEST_PLURAL_RULES,
+                    true);
+          }
+          latch.countDown();
+          return result;
+        };
     List<Callable<String[]>> tasksWithMMap = new ArrayList<>();
     for (int i = 0; i < numberOfThreads; i++) {
       tasksWithMMap.add(getQuantityStringTaskMMap);

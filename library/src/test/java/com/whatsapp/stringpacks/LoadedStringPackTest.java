@@ -6,13 +6,13 @@
 
 package com.whatsapp.stringpacks;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -22,19 +22,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.io.InputStream;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
 public class LoadedStringPackTest {
@@ -43,8 +34,8 @@ public class LoadedStringPackTest {
 
   @Before
   public void setUp() {
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh.pack");
-      
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh.pack");
+
     parsedStringPack = new ParsedStringPack(inputStream, Collections.singletonList("zh"), null);
   }
 
@@ -92,11 +83,12 @@ public class LoadedStringPackTest {
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
     CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-    Callable<String> getStringTask = () -> {
-      String string = parsedStringPack.getString(StringPacksTestData.STRING_ID, false);
-      latch.countDown();
-      return string;
-    };
+    Callable<String> getStringTask =
+        () -> {
+          String string = parsedStringPack.getString(StringPacksTestData.STRING_ID, false);
+          latch.countDown();
+          return string;
+        };
     List<Callable<String>> tasks = new ArrayList<>();
     for (int i = 0; i < numberOfThreads; i++) {
       tasks.add(getStringTask);
@@ -130,13 +122,14 @@ public class LoadedStringPackTest {
     for (int i = 0; i < numberOfThreads; i++) {
       final int nextRandomNumber = random.nextInt(numStringToCall - 1) + 1;
       // Add tasks to be called
-      tasks.add(() -> {
-        List<String> outcome = new ArrayList<>();
-        outcome.add(StringPacksTestData.EXPECTED_STRINGS[nextRandomNumber]);
-        outcome.add(parsedStringPack.getString(nextRandomNumber, false));
-        latch.countDown();
-        return outcome;
-      });
+      tasks.add(
+          () -> {
+            List<String> outcome = new ArrayList<>();
+            outcome.add(StringPacksTestData.EXPECTED_STRINGS[nextRandomNumber]);
+            outcome.add(parsedStringPack.getString(nextRandomNumber, false));
+            latch.countDown();
+            return outcome;
+          });
     }
     List<Future<List<String>>> results = service.invokeAll(tasks, 5, TimeUnit.SECONDS);
     latch.await();
@@ -164,19 +157,20 @@ public class LoadedStringPackTest {
     ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
     CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
-    Callable<String[]> getQuantityStringTask = () -> {
-      String[] result = new String[numQuantityStrings];
-      for (int i = 0; i < numQuantityStrings; i++) {
-        result[i] =
-            parsedStringPack.getQuantityString(
-                StringPacksTestData.PLURALS_ID,
-                (long) i,
-                StringPacksTestData.TEST_PLURAL_RULES,
-                false);
-      }
-      latch.countDown();
-      return result;
-    };
+    Callable<String[]> getQuantityStringTask =
+        () -> {
+          String[] result = new String[numQuantityStrings];
+          for (int i = 0; i < numQuantityStrings; i++) {
+            result[i] =
+                parsedStringPack.getQuantityString(
+                    StringPacksTestData.PLURALS_ID,
+                    (long) i,
+                    StringPacksTestData.TEST_PLURAL_RULES,
+                    false);
+          }
+          latch.countDown();
+          return result;
+        };
     List<Callable<String[]>> tasks = new ArrayList<>();
     for (int i = 0; i < numberOfThreads; i++) {
       tasks.add(getQuantityStringTask);

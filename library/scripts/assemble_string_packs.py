@@ -19,7 +19,9 @@ import string_pack_config
 
 def create_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Assemble String Packs.")
-    arg_parser.add_argument("--config", help="Location of JSON config file.", required=True)
+    arg_parser.add_argument(
+        "--config", help="Location of JSON config file.", required=True
+    )
 
     return arg_parser
 
