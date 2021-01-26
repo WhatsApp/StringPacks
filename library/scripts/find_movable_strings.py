@@ -7,6 +7,7 @@
 
 
 import argparse
+import math
 import re
 import subprocess
 from os import path
@@ -29,6 +30,16 @@ def separate_namespace(attribute_name):
 STRING_USAGE_RE = re.compile("@string/([A-Za-z0-9_]+)")
 
 OK_NAMESPACES = {"http://schemas.android.com/tools"}
+
+# Previously, we would just generate a list of string ids and their mapping, one pair per line
+# broken with newlines.
+# Unfortunately, this breaks if there are around 4k strings or so as it results in the method's
+# bytecode size exceeding the JVM limit (64k).
+# Thus, we must instead break the list into parts if we hit this limit.
+# But then we can't just generate a list with newlines - we also need to generate the code
+# surrounding the list pieces so the developer can still easily use one statement
+# (getStringPacksMapping()) to use the generated code.
+MAX_IDS_PER_METHOD = 4000
 
 
 def find_strings_used_in_xml(filename, safe_widgets):
@@ -90,10 +101,109 @@ def output_string_ids_map(sp_config, strings_to_move):
     with open(class_file_path, "wt") as pack_ids_file:
         pack_ids_file.writelines(
             existing_class_file_lines[0 : region_start_index + 1]
-            + [line + "\n" for line in string_pack_ids]
+            + (
+                generate_kotlin(string_pack_ids)
+                if class_file_path.endswith(".kt")
+                else generate_java(string_pack_ids)
+            )
             + existing_class_file_lines[region_end_index:]
         )
     print("Updated: " + class_file_path)
+
+def generate_java(string_pack_ids):
+    if len(string_pack_ids) <= MAX_IDS_PER_METHOD:
+        # No need for sub-methods, just create the whole array in the main method
+        return generate_java_internal(string_pack_ids, "getStringPacksMapping")
+
+    result = []
+    result += " " * 2 + "private static int[] getStringPacksMapping() {\n"
+    result += (
+        " " * 6 + "final int[] result = new int[" + str(len(string_pack_ids)) + "];\n"
+    )
+    result += " " * 6 + "int[] part;\n"
+
+    parts = math.ceil(len(string_pack_ids) / MAX_IDS_PER_METHOD)
+    for i in range(0, parts):
+        result += " " * 6 + "part = getStringPacksMappingPart" + str(i) + "();\n"
+        result += (
+            " " * 6
+            + "System.arraycopy(part, 0, result, "
+            + str(MAX_IDS_PER_METHOD * i)
+            + ", part.length);\n"
+        )
+
+    result += " " * 6 + "return result;\n"
+    result += " " * 2 + "}\n"
+    result += "\n"
+
+    # Create submethods
+    for i in range(0, parts):
+        start = i * MAX_IDS_PER_METHOD
+        end = start + MAX_IDS_PER_METHOD
+        result += generate_java_internal(
+            string_pack_ids[start:end], "getStringPacksMappingPart%s" % i
+        )
+
+    return result
+
+
+def generate_java_internal(string_pack_ids, method_name):
+    result = []
+    result += " " * 2 + "private static int[] %s() {\n" % method_name
+    result += " " * 6 + "return new int[]{\n"
+    for line in string_pack_ids:
+        result += line + "\n"
+    result += " " * 6 + "};\n"
+    result += " " * 2 + "}\n"
+    result += "\n"
+    return result
+
+
+def generate_kotlin(string_pack_ids):
+    if len(string_pack_ids) <= MAX_IDS_PER_METHOD:
+        # No need for sub-methods, just create the whole array in the main method
+        return generate_kotlin_internal(string_pack_ids, "getStringPacksMapping")
+
+    result = []
+    result += "fun getStringPacksMapping(): Array<Int> {\n"
+    result += " " * 4 + "val result = int[" + str(len(string_pack_ids)) + "]\n"
+    result += " " * 4 + "var part: Array<Int>\n"
+
+    parts = math.ceil(len(string_pack_ids) / MAX_IDS_PER_METHOD)
+    for i in range(0, parts):
+        result += " " * 4 + "part = getStringPacksMappingPart" + str(i) + "()\n"
+        result += (
+            " " * 4
+            + "System.arraycopy(part, 0, result, "
+            + str(MAX_IDS_PER_METHOD * i)
+            + ", part.length)\n"
+        )
+
+    result += " " * 4 + "result\n"
+    result += "}\n"
+    result += "\n"
+
+    # Create submethods
+    for i in range(0, parts):
+        start = i * MAX_IDS_PER_METHOD
+        end = start + MAX_IDS_PER_METHOD
+        result += generate_kotlin_internal(
+            string_pack_ids[start:end], "getStringPacksMappingPart%s" % i
+        )
+
+    return result
+
+
+def generate_kotlin_internal(string_pack_ids, method_name):
+    result = []
+    result += "fun %s(): Array<Int> {\n" % method_name
+    result += " " * 4 + "intArrayOf(\n"
+    for line in string_pack_ids:
+        result += line + "\n"
+    result += " " * 4 + ")\n"
+    result += "}\n"
+    result += "\n"
+    return result
 
 
 def find_movable_strings(sp_config, print_reverse=False):

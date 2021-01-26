@@ -9,9 +9,8 @@ package {package.name}
 import com.whatsapp.stringpacks.StringPacks
 
 fun registerStringPackIds() {
-  StringPacks.getInstance().register(
-    intArrayOf(
-      // region StringPacks ID Map
-      // endregion
-    ))
+  StringPacks.getInstance().register(getStringPacksMapping())
 }
+
+// region StringPacks ID Map
+// endregion
