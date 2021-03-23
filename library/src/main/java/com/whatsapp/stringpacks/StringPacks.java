@@ -13,7 +13,6 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.PluralsRes;
-import androidx.annotation.Size;
 import androidx.annotation.StringRes;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,12 +95,11 @@ public class StringPacks {
   }
 
   /** Registers map of app resource IDs to stringpack IDs. Called once at app start. */
-  public void register(@NonNull @Size(multiple = 2) int[] idTable) {
+  public void register(@NonNull int[] idTable) {
     final int length = idTable.length;
-    for (int i = 0; i < length; i += 2) {
+    for (int i = 0; i < length; i++) {
       final int resId = idTable[i];
-      final int packId = idTable[i + 1];
-      resIdToPackIdMap.put(resId, packId);
+      resIdToPackIdMap.put(resId, i);
     }
   }
 

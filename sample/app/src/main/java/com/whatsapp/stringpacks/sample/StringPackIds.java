@@ -17,7 +17,7 @@ public class StringPackIds {
   // region StringPacks ID Map
   private static int[] getStringPacksMapping() {
     return new int[] {
-      R.string.hello_world, 0,
+      R.string.hello_world,
     };
   }
 

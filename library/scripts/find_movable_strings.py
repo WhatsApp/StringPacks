@@ -33,13 +33,13 @@ OK_NAMESPACES = {"http://schemas.android.com/tools"}
 
 # Previously, we would just generate a list of string ids and their mapping, one pair per line
 # broken with newlines.
-# Unfortunately, this breaks if there are around 4k strings or so as it results in the method's
+# Unfortunately, this breaks if there are around 8k strings or so as it results in the method's
 # bytecode size exceeding the JVM limit (64k).
 # Thus, we must instead break the list into parts if we hit this limit.
 # But then we can't just generate a list with newlines - we also need to generate the code
 # surrounding the list pieces so the developer can still easily use one statement
 # (getStringPacksMapping()) to use the generated code.
-MAX_IDS_PER_METHOD = 4000
+MAX_IDS_PER_METHOD = 8000
 
 
 def find_strings_used_in_xml(filename, safe_widgets):
@@ -68,9 +68,7 @@ def output_string_ids_map(sp_config, strings_to_move):
     string_pack_ids = []
     for index, string_tuple in enumerate(sorted(strings_to_move)):
         string_type, string_name = string_tuple
-        string_pack_ids.append(
-            (" " * 10 + "R.%s.%s, %d,") % (string_type, string_name, index)
-        )
+        string_pack_ids.append((" " * 10 + "R.%s.%s,") % (string_type, string_name))
 
     class_file_path = sp_config.pack_ids_class_file_path
     if class_file_path is None or not path.exists(class_file_path):
@@ -109,6 +107,7 @@ def output_string_ids_map(sp_config, strings_to_move):
             + existing_class_file_lines[region_end_index:]
         )
     print("Updated: " + class_file_path)
+
 
 def generate_java(string_pack_ids):
     if len(string_pack_ids) <= MAX_IDS_PER_METHOD:

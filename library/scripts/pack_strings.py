@@ -21,20 +21,15 @@ class IdFinder(object):
     def __init__(self, sp_config):
         with open(sp_config.pack_ids_class_file_path, "rt") as fd:
             self.id_data = fd.read()
+        all_matches = re.findall(r"R\.(?:string|plurals)(?:.*?)\.(\w+),", self.id_data, flags=re.DOTALL)
         self.seen_ids = {}
+        for i in range(0, len(all_matches)):
+            self.seen_ids[all_matches[i]] = i
 
     def get_id(self, resource_name):
         if resource_name in self.seen_ids:
             return self.seen_ids[resource_name]
-        java_resource_name = r"R\.(?:string|plurals)\." + resource_name
-        match = re.search(
-            "%s,\s+([0-9]+)," % java_resource_name, self.id_data, flags=re.MULTILINE
-        )
-        if match is None:
-            return None
-        id = int(match.group(1))
-        self.seen_ids[resource_name] = id
-        return id
+        return None
 
 
 def group_string_files_by_languages(pack_id_mapping, packable_strings_file_paths):
