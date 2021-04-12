@@ -8,6 +8,7 @@ package com.whatsapp.stringpacks;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 
 public class StringPackContext extends ContextWrapper {
@@ -38,5 +39,10 @@ public class StringPackContext extends ContextWrapper {
   @Override
   public Resources getResources() {
     return spResources;
+  }
+
+  @Override
+  public Context createConfigurationContext(Configuration overrideConfiguration) {
+    return StringPackContext.wrap(super.createConfigurationContext(overrideConfiguration));
   }
 }

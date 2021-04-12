@@ -6,20 +6,24 @@
 
 package com.whatsapp.stringpacks.sample;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import com.whatsapp.stringpacks.StringPackContext;
+import com.whatsapp.stringpacks.StringPackResources;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
   TextView textView;
+
+  private @Nullable StringPackResources stringPackResources;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +61,25 @@ public class MainActivity extends Activity {
     super.attachBaseContext(StringPackContext.wrap(base));
   }
 
+  /**
+   * This method needs to be overridden in an an Activity only if it matches all of the
+   * following conditions
+   * 1. minSdkVersion of the app is less than 17
+   * 2. App has a dependency on androidx.appcompat:appcompat:1.2.0 or above (see
+   * <a href="https://github.com/WhatsApp/StringPacks/blob/master/sample/app/build.gradle#L39">build.gradle</a>)
+   * 3. Activity extends from {@code AppCompatActivity}
+   *
+   * <p>If any of the above constraints is false, there is no need to override this method
+   *
+   * @return StringPackResources that wraps base resources.
+   */
+  @Override
+  public Resources getResources() {
+    if (stringPackResources == null) {
+      stringPackResources = StringPackResources.wrap(super.getResources());
+    }
+    return stringPackResources;
+  }
 
   private void changeLanguage(String languageTag) {
     LocaleUtil.overrideCustomLanguage(this, languageTag);
