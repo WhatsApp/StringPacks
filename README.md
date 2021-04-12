@@ -72,6 +72,36 @@ override fun attachBaseContext(base: Context?) {
 }
 ```
 
+If all of the following conditions meet, you need to override `getResources()` function also in your `Activity`
+1. App's `minSdkVersion` is < 17
+2. You have a dependency on `androidx.appcompat:appcompat:1.2.0`
+3. Your Activity extends from [`AppCompatActivity`](https://developer.android.com/reference/androidx/appcompat/app/AppCompatActivity)
+
+```java
+// Java
+
+private @Nullable StringPackResources stringPackResources;
+@Override
+public Resources getResources() {
+  if (stringPackResources == null) {
+    stringPackResources = StringPackResources.wrap(super.getResources());
+  }
+  return stringPackResources;
+}
+```
+
+```kotlin
+// Kotlin
+
+private @Nullable var stringPackResources:Resources? = null
+override fun getResources(): Resources? {
+  if (stringPackResources == null) {
+    stringPackResources = StringPackResources.wrap(super.getResources())
+  }
+  return stringPackResources
+}
+```
+
 Your Android application also needs to use a custom [`Application`](https://developer.android.com/reference/android/app/Application), which needs to include the following code to ensure the strings are read from `.pack` files.
 
 ```java
