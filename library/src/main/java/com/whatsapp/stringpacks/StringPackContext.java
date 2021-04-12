@@ -30,13 +30,6 @@ public class StringPackContext extends ContextWrapper {
   }
 
   @Override
-  public Context getBaseContext() {
-    throw new UnsupportedOperationException(
-        "Use base context would not guarantee to get strings from StringPacks. "
-            + "Use getApplicationContext() would be proper in some cases.");
-  }
-
-  @Override
   public Resources getResources() {
     return spResources;
   }
