@@ -39,7 +39,7 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
    dependencies {
      ...
      ...
-     implementation 'com.whatsapp.stringpacks:stringpacks:0.2.0'
+     implementation 'com.whatsapp.stringpacks:stringpacks:0.2.1'
    }
    ```
 
