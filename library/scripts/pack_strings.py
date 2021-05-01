@@ -21,7 +21,9 @@ class IdFinder(object):
     def __init__(self, sp_config):
         with open(sp_config.pack_ids_class_file_path, "rt") as fd:
             self.id_data = fd.read()
-        all_matches = re.findall(r"R\.(?:string|plurals)(?:.*?)\.(\w+),", self.id_data, flags=re.DOTALL)
+        all_matches = re.findall(
+            r"R\.(?:string|plurals)(?:.*?)\.(\w+),", self.id_data, flags=re.DOTALL
+        )
         self.seen_ids = {}
         for i in range(0, len(all_matches)):
             self.seen_ids[all_matches[i]] = i
@@ -56,10 +58,16 @@ def get_dest_pack_file_path(sp_config, pack_id):
 
 def pack_strings(sp_config, plural_handler):
     id_finder = IdFinder(sp_config)
-    packable_strings_file_paths = glob.glob(
-        os.path.join(sp_config.packable_strings_directory, "**/strings.xml"),
-        recursive=True,
-    )
+    packable_strings_file_paths = set()
+
+    moved = []
+    for directory in sp_config.original_resources_directories:
+        moved.append(os.path.join(directory, "string-packs", "strings"))
+
+    for directory in moved:
+        packable_strings_file_paths.update(
+            glob.glob(os.path.join(directory, "**/strings.xml"), recursive=True)
+        )
 
     grouped_strings_file_paths = group_string_files_by_languages(
         sp_config.pack_id_mapping, packable_strings_file_paths

@@ -14,7 +14,7 @@ After the project is loaded, click "Run" button, the `stringpacks` library shoul
 Whenever you add new translated string resources in the Sample project, run following command in the `sample/` directory to move packable strings to `string-packs` directory:
 
 ```
-python3 ../library/scripts/assemble_string_packs.py --config ./app/string-packs/config.json
+python3 ../library/scripts/assemble_string_packs.py --config ./app/src/main/string-packs/config.json
 ```
 
 You can commit those string resources and moved files in the source control repository.

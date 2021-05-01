@@ -7,7 +7,6 @@
 
 
 import unittest
-from unittest import mock
 
 import move_strings_for_packing as sp_move
 from tests import test_util
@@ -15,12 +14,9 @@ from tests import test_util
 
 class TestPackStringsMethods(unittest.TestCase):
     def test_get_dest_file(self):
-        sp_config = mock.Mock()
-        sp_config.packable_strings_directory = "app/string-packs/strings"
-
         self.assertEqual(
-            "app/string-packs/strings/src_main_res_/values-zh/strings.xml",
-            sp_move.get_dest_file(sp_config, "src/main/res/", "zh"),
+            "app/string-packs/strings/values-zh/strings.xml",
+            sp_move.get_dest_file("app", "zh"),
         )
 
     def test_get_resource_file_content(self):

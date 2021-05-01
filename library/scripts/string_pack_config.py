@@ -80,7 +80,6 @@ class StringPackConfig:
         "find_resource_files_command",
         "languages_to_pack",
         "languages_to_drop",
-        "packable_strings_directory",
         "assets_directory",
         "pack_ids_class_file_path",
         "pack_id_mapping",
@@ -91,7 +90,12 @@ class StringPackConfig:
         # The project module that string packs are used for.
         self.module = None
 
-        # The Android resources directories, where the script can find values/strings.xml and values-xx/ directories.
+        # The directories above the Android resources directories, where the script can find values/strings.xml and values-xx/ directories.
+        # (i.e. app/src/main)
+        # These directories will also hold the files of the packable strings.
+        # FIND operation checks each directory's res subdirectory for values/strings.xml and values-xx/.strings.xml files. The ids are stored in pack_ids_class_file_path.
+        # MOVE operation moves packable strings found in FIND to the directory's string-packs/strings subdirectory.
+        # PACK operation packs the files in the directory's string-packs/strings subdirectory into .pack files in assets_directory.
         self.original_resources_directories = []
 
         # Executable command line that returns all resource files for parsing movable strings.
@@ -106,10 +110,6 @@ class StringPackConfig:
 
         # The full class name of custom widgets that are already using StringPack resources reader.
         self.safe_widget_classes = set()
-
-        # The directory that holds the files of the packable strings. MOVE operation moves packable strings from
-        # original resource files to this directory, and PACK operation packs them into file .pack files.
-        self.packable_strings_directory = None
 
         # The assets directory where to save the generated string pack files.
         self.assets_directory = None
@@ -153,7 +153,7 @@ class StringPackConfig:
 
     def get_default_string_files(self):
         return [
-            os.path.join(source_directory, "values", "strings.xml")
+            os.path.join(source_directory, "res", "values", "strings.xml")
             for source_directory in self.original_resources_directories
         ]
 

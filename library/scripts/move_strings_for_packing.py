@@ -90,11 +90,11 @@ def move_strings(srcfile, dstfile, id_finder, keep_dest):
         xml_file.write(FOOTER)
 
 
-def get_dest_file(sp_config, source_resource_directory, language_qualifier):
+def get_dest_file(moved_resource_directory, language_qualifier):
     dest_file = os.path.join(
-        sp_config.packable_strings_directory,
-        # keep source directory information at destination file to help us debug in future.
-        source_resource_directory.replace(os.path.sep, "_"),
+        moved_resource_directory,
+        "string-packs",
+        "strings",
         "values-" + language_qualifier,
         "strings.xml",
     )
@@ -110,7 +110,9 @@ CLEAR_COLOR = "\033[0m"
 def move_all_strings(sp_config, keep_dest):
     id_finder = pack_strings.IdFinder(sp_config)
     for resources_directory in sp_config.original_resources_directories:
-        path_pattern = os.path.join(resources_directory, "values-*", "strings.xml")
+        path_pattern = os.path.join(
+            resources_directory, "res", "values-*", "strings.xml"
+        )
 
         for string_xml_path in glob.glob(path_pattern):
             values_directory_name = os.path.normpath(string_xml_path).split(os.sep)[-2]
@@ -126,7 +128,7 @@ def move_all_strings(sp_config, keep_dest):
                 logging.info("Moving: %s", string_xml_path)
                 move_strings(
                     string_xml_path,
-                    get_dest_file(sp_config, resources_directory, resource_qualifier),
+                    get_dest_file(resources_directory, resource_qualifier),
                     id_finder,
                     keep_dest,
                 )
