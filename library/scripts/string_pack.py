@@ -7,6 +7,7 @@ import collections
 import os
 import re
 import sys
+import logging
 from xml.etree import ElementTree
 
 
@@ -232,7 +233,12 @@ class StringPack(object):
     def add_for_locale(self, locale, string_dict):
         locale_dict = self.store[locale]
         for key, value in string_dict.items():
-            assert key not in locale_dict
+            if key in locale_dict:
+                logging.warning(
+                    "Warning: id {} being overridden by:{}, previous value:{}".format(
+                        key, value, locale_dict[key]
+                    )
+                )
             locale_dict[key] = value
 
     def compile(self):
