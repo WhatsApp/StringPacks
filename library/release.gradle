@@ -63,6 +63,13 @@ afterEvaluate { project ->
         }
     }
 
+    def releaseVariant
+    android.libraryVariants.all { variant ->
+        if (variant.buildType.name == 'release') {
+            releaseVariant = variant.name
+        }
+    }
+
     publishing {
         publications {
             mavenRelease(MavenPublication) {
@@ -70,7 +77,7 @@ afterEvaluate { project ->
                 artifactId POM_ARTIFACT_ID
                 version LIBRARY_VERSION_NAME
 
-                from components.release
+                from components[releaseVariant]
 
                 artifact androidJavadocJar
                 artifact androidSourcesJar
