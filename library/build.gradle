@@ -4,14 +4,14 @@
  * the LICENSE file in the root directory of this source tree.
  */
 
-apply from: 'release.gradle'
-
 // Provide gradle script in project root directory to customize the build variants.
 if (file("$rootDir/gradle/android-library-config.gradle").exists()) {
     apply from: "$rootDir/gradle/android-library-config.gradle"
 } else {
     apply from: "android-library-config.gradle"
 }
+
+apply from: 'release.gradle'
 
 dependencies {
     implementation "androidx.annotation:annotation:1.1.0"

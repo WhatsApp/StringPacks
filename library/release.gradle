@@ -4,8 +4,11 @@
  * the LICENSE file in the root directory of this source tree.
  */
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
+
+version = LIBRARY_VERSION_NAME
+group = GROUP
 
 def isReleaseBuild() {
     return LIBRARY_VERSION_NAME.contains("SNAPSHOT") == false
@@ -23,65 +26,15 @@ def getMavenRepositoryPassword() {
     return hasProperty('repositoryPassword') ? property('repositoryPassword') : ""
 }
 
-def configureStringPacksPom(def pom) {
-    pom.whenConfigured {
-        applyOptionalDeps it, getOptionalDeps()
-    }
-    pom.project {
-        name POM_NAME
-        artifactId POM_ARTIFACT_ID
-        packaging POM_PACKAGING
-        description POM_DESCRIPTION
-        url POM_URL
-
-        scm {
-            url POM_SCM_URL
-            connection POM_SCM_CONNECTION
-            developerConnection POM_SCM_DEV_CONNECTION
-        }
-
-        licenses {
-            license {
-                name POM_LICENSE_NAME
-                url POM_LICENSE_URL
-                distribution POM_LICENSE_DIST
-            }
-        }
-
-        developers {
-            developer {
-                id POM_DEVELOPER_ID
-                name POM_DEVELOPER_NAME
-            }
-        }
-    }
-}
-
-// Hack to modify the resulting pom's dependencies to use
-// <optional>true</optional> where appropriate.
-def applyOptionalDeps(def pom, def optionalDeps) {
-    pom.dependencies.each { dep ->
-        def artifactLabel = dep.groupId + ':' + dep.artifactId
-        if (optionalDeps.contains(artifactLabel)) {
-            dep.optional = true
-        }
-    }
-}
-
-def getOptionalDeps() {
-    if (hasProperty('POM_OPTIONAL_DEPS')) {
-        return property('POM_OPTIONAL_DEPS').split(',') as Set
-    } else {
-        return []
-    }
-}
-
 afterEvaluate { project ->
     task androidJavadoc(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += files(android.bootClasspath)
+        source = android.sourceSets.main.java.source
+        classpath += files(android.getBootClasspath().join(File.pathSeparator))
         if (JavaVersion.current().isJava8Compatible()) {
             options.addStringOption('Xdoclint:none', '-quiet')
+        }
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
         }
     }
 
@@ -92,54 +45,80 @@ afterEvaluate { project ->
 
     task androidSourcesJar(type: Jar) {
         classifier = 'sources'
-        from android.sourceSets.main.java.srcDirs
+        from android.sourceSets.main.java.source
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocJar
     }
 
     android.libraryVariants.all { variant ->
+        tasks.androidJavadoc.doFirst {
+            classpath += files(variant.javaCompileProvider.get().classpath.files.join(File.pathSeparator))
+        }
         def name = variant.name.capitalize()
         task "jar${name}"(type: Jar, dependsOn: variant.javaCompileProvider) {
             from variant.javaCompileProvider.get().destinationDir
         }
     }
 
-    artifacts {
-        archives androidJavadocJar
-        archives androidSourcesJar
-    }
+    publishing {
+        publications {
+            mavenRelease(MavenPublication) {
+                groupId GROUP
+                artifactId POM_ARTIFACT_ID
+                version LIBRARY_VERSION_NAME
 
-    version = LIBRARY_VERSION_NAME
-    group = GROUP
+                from components.release
 
-    signing {
-        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
-        sign configurations.archives
-    }
+                artifact androidJavadocJar
+                artifact androidSourcesJar
 
-    uploadArchives {
-        configuration = configurations.archives
-        repositories.mavenDeployer {
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment)
+                pom {
+                    name = POM_NAME
+                    description = POM_DESCRIPTION
+                    url = POM_URL
+
+                    scm {
+                        url = POM_SCM_URL
+                        connection = POM_SCM_CONNECTION
+                        developerConnection = POM_SCM_DEV_CONNECTION
+                    }
+
+                    licenses {
+                        license {
+                            name = POM_LICENSE_NAME
+                            url = POM_LICENSE_URL
+                            distribution = POM_LICENSE_DIST
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                        }
+                    }
+                }
             }
+        }
 
-            repository(url: getMavenRepositoryUrl()) {
-                authentication(
-                        userName: getMavenRepositoryUsername(),
-                        password: getMavenRepositoryPassword())
-
+        repositories {
+            maven {
+                url getMavenRepositoryUrl()
+                credentials(PasswordCredentials) {
+                    username = getMavenRepositoryUsername()
+                    password = getMavenRepositoryPassword()
+                }
             }
-
-            configureStringPacksPom pom
         }
     }
 
-    task installArchives(type: Upload) {
-        configuration = configurations.archives
-        repositories {
-            mavenDeployer {
-                repository url: "file://${System.properties['user.home']}/.m2/repository"
-                configureStringPacksPom pom
-            }
+    signing {
+        required { isReleaseBuild() }
+        publishing.publications.all { publication ->
+            sign publication
         }
     }
 }
