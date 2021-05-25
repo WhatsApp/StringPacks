@@ -38,4 +38,12 @@ public class StringPackContext extends ContextWrapper {
   public Context createConfigurationContext(Configuration overrideConfiguration) {
     return StringPackContext.wrap(super.createConfigurationContext(overrideConfiguration));
   }
+
+  @Override
+  public Context getBaseContext() {
+    SpLog.w(
+        "Using base context would not guarantee to get strings from StringPacks. "
+            + "Use getApplicationContext() instead.");
+    return super.getBaseContext();
+  }
 }

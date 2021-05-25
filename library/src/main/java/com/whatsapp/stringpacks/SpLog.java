@@ -23,4 +23,25 @@ public class SpLog {
       logger.e(message);
     }
   }
+
+  public static void w(String message) {
+    final Logger logger = loggerRef.get();
+    if (logger != null) {
+      logger.w(message);
+    }
+  }
+
+  public static void i(String message) {
+    final Logger logger = loggerRef.get();
+    if (logger != null) {
+      logger.i(message);
+    }
+  }
+
+  public static void d(String message) {
+    final Logger logger = loggerRef.get();
+    if (logger != null) {
+      logger.d(message);
+    }
+  }
 }
