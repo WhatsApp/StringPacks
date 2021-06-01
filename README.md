@@ -21,7 +21,7 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
 3. Move [template config.json](library/templates/config.json) to your Android application project directory.
     - Replace `{app}` to be your application project directory name.
     - Point `pack_ids_class_file_path` to the path where you put the `StringPackIds` file.
-4. Include `mavenCentral()` under `repositories` in your Android project's `build.gradle`.
+4. Make following changes to your Android project's `build.gradle`.
    ```
    allprojects {
      
@@ -31,7 +31,13 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
     }
     ...
    }
+
+   // Replace `{path_to_config.json}` with the path to your `config.json` file
+   ext {
+     stringPacksConfigFile = "$rootDir/{path_to_config.json}"
+   }
    ```
+   - Replace `{path_to_config.json}` with the path to your `config.json` file
 5. Make following changes to your Android application's `build.gradle`
    ```
    apply from: "$rootDir/pack.gradle"

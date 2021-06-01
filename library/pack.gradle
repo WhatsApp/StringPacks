@@ -18,17 +18,6 @@ if (hasProperty('stringPacksConfigFile')) {
     tasks.register('generateStringPacks', Exec) {
         workingDir "$rootDir"
 
-        for (String dir : "${spConfig.original_resource_directories}") {
-            def file = file("$rootDir/$dir/string-packs/strings")
-            if (file.exists() || file.mkdirs()) {
-                inputs.dir(fileTree(file))
-            }
-        }
-        inputs.file("$rootDir/${spConfig.pack_ids_class_file_path}")
-        inputs.file(packScript)
-
-        outputs.dir(assetsDir)
-
         commandLine 'python3', packScript, '--config', configFile.path
     }
 
