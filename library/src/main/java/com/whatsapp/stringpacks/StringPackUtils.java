@@ -6,6 +6,7 @@
 
 package com.whatsapp.stringpacks;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import androidx.annotation.NonNull;
@@ -29,5 +30,10 @@ public class StringPackUtils {
       }
     }
     return locale;
+  }
+
+  @NonNull
+  public static Locale getLocaleForContext(@NonNull Context context) {
+    return getLocaleFromConfiguration(context.getResources().getConfiguration());
   }
 }

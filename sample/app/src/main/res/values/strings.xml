@@ -2,6 +2,7 @@
     <string name="app_name">StringPacks</string>
     <string name="hello_world">Hello World!</string>
 
+    <string name="device_language">Device language (%1$s)</string>
     <string-array name="language_tags">
         <item>ar</item>
         <item>en</item>

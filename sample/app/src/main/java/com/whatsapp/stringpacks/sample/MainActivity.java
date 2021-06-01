@@ -14,16 +14,25 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.whatsapp.stringpacks.StringPackContext;
 import com.whatsapp.stringpacks.StringPackResources;
+import com.whatsapp.stringpacks.StringPackUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements LanguageChangeHandler.OnDeviceLocaleChangeListener {
 
   TextView textView;
 
   private @Nullable StringPackResources stringPackResources;
+  private @Nullable ArrayAdapter<CharSequence> adapter;
+  private @NonNull List<String> languageCodes = new ArrayList<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -33,23 +42,41 @@ public class MainActivity extends AppCompatActivity {
     textView = findViewById(R.id.text_view);
     textView.setText(R.string.hello_world);
 
+    LanguageChangeHandler.getInstance().registerOnDeviceLocaleChangeListeners(this);
+
     setupLanguageSelector();
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    LanguageChangeHandler.getInstance().unregisterOnDeviceLocaleChangeListener(this);
   }
 
   private void setupLanguageSelector() {
     Spinner spinner = findViewById(R.id.language_spinner);
     // TODO: display language full name instead of language code
-    ArrayAdapter<CharSequence> adapter =
-        ArrayAdapter.createFromResource(
-            this, R.array.language_tags, android.R.layout.simple_spinner_item);
+    String[] langCodes = getResources().getStringArray(R.array.language_tags);
+    languageCodes.addAll(Arrays.asList(langCodes));
+    languageCodes.add(0, getDeviceLanguageItem());
+    adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+    adapter.addAll(languageCodes);
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     spinner.setAdapter(adapter);
-    // TODO: set selection to be current system language
 
     spinner.setOnItemSelectedListener(
         new AdapterView.OnItemSelectedListener() {
           public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-            changeLanguage(parent.getItemAtPosition(pos).toString());
+            String language;
+            if (pos == 0) {
+              Locale locale =
+                  StringPackUtils.getLocaleFromConfiguration(
+                      getApplicationContext().getResources().getConfiguration());
+              language = locale.getLanguage();
+            } else {
+              language = parent.getItemAtPosition(pos).toString();
+            }
+            changeLanguage(language);
           }
 
           public void onNothingSelected(AdapterView<?> parent) {}
@@ -62,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   /**
-   * This method needs to be overridden in an an Activity only if it matches all of the
-   * following conditions
+   * This method needs to be overridden in an an Activity only if it matches all of the following
+   * conditions
    * 1. minSdkVersion of the app is less than 17
    * 2. App has a dependency on androidx.appcompat:appcompat:1.2.0 or above (see
    * <a href="https://github.com/WhatsApp/StringPacks/blob/master/sample/app/build.gradle#L39">build.gradle</a>)
@@ -79,6 +106,20 @@ public class MainActivity extends AppCompatActivity {
       stringPackResources = StringPackResources.wrap(super.getResources());
     }
     return stringPackResources;
+  }
+
+  @Override
+  public void onDeviceLocaleChanged(Locale newLocale) {
+    languageCodes.remove(0);
+    languageCodes.add(0, getDeviceLanguageItem());
+    adapter.notifyDataSetChanged();
+  }
+
+  @NonNull
+  private String getDeviceLanguageItem() {
+    return getString(
+        R.string.device_language,
+        StringPackUtils.getLocaleForContext(getApplicationContext()).getLanguage());
   }
 
   private void changeLanguage(String languageTag) {
