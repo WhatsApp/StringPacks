@@ -24,7 +24,7 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
 4. Make following changes to your Android project's `build.gradle`.
    ```
    allprojects {
-     
+
      repositories {
        ...
        mavenCentral()
@@ -41,7 +41,7 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
 5. Make following changes to your Android application's `build.gradle`
    ```
    apply from: "$rootDir/pack.gradle"
-   
+
    dependencies {
      ...
      ...
@@ -117,8 +117,13 @@ Your Android application also needs to use a custom [`Application`](https://deve
 protected void attachBaseContext(Context base) {
   StringPackIds.registerStringPackIds();
   StringPacks.getInstance().setUp(base);
-  
+
   super.attachBaseContext(StringPackContext.wrap(base));
+}
+
+@Override
+public Context getBaseContext() {
+  return ContextUtils.getRootContext(super.getBaseContext());
 }
 ```
 
@@ -131,6 +136,10 @@ override fun attachBaseContext(base: Context?) {
 
     super.attachBaseContext(StringPackContext.wrap(base))
 }
+
+override fun getBaseContext(): Context {
+  return ContextUtils.getRootContext(super.getBaseContext())
+}
 ```
 
 You only need to do this each time you add a new context component. You don't need to do this for each component if you add them to a base class.
@@ -138,7 +147,7 @@ You only need to do this each time you add a new context component. You don't ne
 ### Generate `.pack` files
 
 You have added the `StringPackIds` file to your project, but it has nothing in it yet. It is supposed to hold the mapping from android resource IDs (`R.string`) to string pack IDs.
-The content would be automatically filled in when you run the script that provided by this library.  
+The content would be automatically filled in when you run the script that provided by this library.
 The mapping information would also be used for generating the `.pack` files, so they are correctly loaded at runtime.
 
 Execute the python script from your project root directory to assemble the string packs:

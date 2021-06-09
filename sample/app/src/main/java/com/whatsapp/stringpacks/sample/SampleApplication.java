@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import com.whatsapp.stringpacks.StringPackContext;
 import com.whatsapp.stringpacks.StringPackUtils;
 import com.whatsapp.stringpacks.StringPacks;
+import com.whatsapp.stringpacks.utils.ContextUtils;
 import java.util.Locale;
 
 public class SampleApplication extends Application {
@@ -22,6 +23,11 @@ public class SampleApplication extends Application {
     StringPackIds.registerStringPackIds();
     StringPacks.getInstance().setUp(base);
     super.attachBaseContext(StringPackContext.wrap(base));
+  }
+
+  @Override
+  public Context getBaseContext() {
+    return ContextUtils.getRootContext(super.getBaseContext());
   }
 
   @Override
