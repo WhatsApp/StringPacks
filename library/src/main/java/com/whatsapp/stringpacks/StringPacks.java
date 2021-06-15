@@ -78,6 +78,8 @@ public class StringPacks {
     synchronized (stringPackLock) {
       if (useStringPack) {
         parsedStringPack = loadData(context, getPackFileName(locale), locale);
+      } else {
+        parsedStringPack = null;
       }
       pluralRules = PluralRules.ruleForLocale(locale);
     }
@@ -157,7 +159,7 @@ public class StringPacks {
   }
 
   @Nullable
-  private static ParsedStringPack loadData(
+  static ParsedStringPack loadData(
       @NonNull Context context, @NonNull String fileName, @NonNull Locale locale) {
     ParsedStringPack result = null;
     String resourcePackFileName = fileName + PACK_FILE_EXTENSION;

@@ -4,6 +4,7 @@
 
     <string name="device_language">Device language (%1$s)</string>
     <string-array name="language_tags">
+        <item>en-US</item>
         <item>ar</item>
         <item>en</item>
         <item>es</item>

@@ -18,7 +18,14 @@ public class LocaleUtil {
   private static final boolean UPDATE_CONFIGURATION_WORKS = Build.VERSION.SDK_INT < 26;
 
   public static void overrideCustomLanguage(Context context, String languageTag) {
-    final Locale newLocale = new Locale(languageTag);
+    String language = languageTag;
+    String country = "";
+    int dashIndex = languageTag.indexOf('-');
+    if (dashIndex > 0) {
+      language = languageTag.substring(0, dashIndex);
+      country = languageTag.substring(dashIndex + 1);
+    }
+    final Locale newLocale = new Locale(language, country);
     final Context overriddenContext;
 
     if (UPDATE_CONFIGURATION_WORKS) {
@@ -26,7 +33,7 @@ public class LocaleUtil {
       final Resources res = context.getResources();
       final Configuration config = res.getConfiguration();
 
-      config.locale = new Locale(languageTag);
+      config.locale = new Locale(language, country);
       res.updateConfiguration(config, res.getDisplayMetrics());
 
       overriddenContext = context;
