@@ -48,6 +48,16 @@ Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/n
      implementation 'com.whatsapp.stringpacks:stringpacks:0.2.1'
    }
    ```
+6. To remove old `.pack` files from the device's internal storage, on every app upgrade, add [MyPackageReplacedReceiver.java](library/src/main/java/com/whatsapp/stringpacks/receiver/MyPackageReplacedReceiver.java) and [PackFileDeletionService.java](library/src/main/java/com/whatsapp/stringpacks/service/PackFileDeletionService.java) to your `AndroidManifest.xml`
+    ```
+    <receiver android:name="com.whatsapp.stringpacks.receiver.MyPackageReplacedReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+        </intent-filter>
+    </receiver>
+    <service android:name="com.whatsapp.stringpacks.service.PackFileDeletionService" android:permission="android.permission.BIND_JOB_SERVICE" />
+    ```
+> Note: If you want to delete old `.pack` files, from internal storage, at some other time instead of app upgrade, call `StringPacks.cleanupOldPackFiles(getApplicationContext())` whenever you want. You don't have to include [MyPackageReplacedReceiver.java](library/src/main/java/com/whatsapp/stringpacks/receiver/MyPackageReplacedReceiver.java) or [PackFileDeletionService.java](library/src/main/java/com/whatsapp/stringpacks/service/PackFileDeletionService.java) in your `AndroidManifest.xml`
 
 You now have StringPacks available in your Android project.
 

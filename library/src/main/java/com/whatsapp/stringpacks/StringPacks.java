@@ -14,8 +14,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.PluralsRes;
 import androidx.annotation.StringRes;
+import com.whatsapp.stringpacks.utils.FileUtils;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +45,10 @@ public class StringPacks {
   }
 
   private static final int NOT_PLURAL = -1;
+  public static final String PACK_FILE_EXTENSION = ".pack";
+  public static final String TEMP_PACK_FILE_EXTENSION = ".pack.tmp";
+  public static final String TEMP_PACK_FILE = "extracted_pack_file" + TEMP_PACK_FILE_EXTENSION;
+  private static final String UNDERSCORE = "_";
 
   @SuppressLint("UseSparseArrays")
   private final HashMap<Integer, Integer> resIdToPackIdMap = new HashMap<>();
@@ -127,9 +139,9 @@ public class StringPacks {
         if (isPlural) {
           // TODO better fix for the int / long interfaces.
           translation =
-              parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, false);
+              parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, true);
         } else {
-          translation = parsedStringPack.getString(location, false);
+          translation = parsedStringPack.getString(location, true);
         }
       }
     }
@@ -150,9 +162,18 @@ public class StringPacks {
   private static ParsedStringPack loadData(
       @NonNull Context context, @NonNull String fileName, @NonNull Locale locale) {
     ParsedStringPack result = null;
-    try (InputStream inputStream = context.getAssets().open(fileName)) {
+    String resourcePackFileName = fileName + PACK_FILE_EXTENSION;
+
+    try (InputStream inputStream = context.getAssets().open(resourcePackFileName)) {
+      MappedByteBuffer mappedByteBuffer = null;
+      File extractedPackFile =
+          extractPackFile(context, fileName, context.getResources(), resourcePackFileName);
+      RandomAccessFile randomAccessFile = new RandomAccessFile(extractedPackFile, "r");
+      FileChannel fileChannel = randomAccessFile.getChannel();
+      mappedByteBuffer =
+          fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, extractedPackFile.length());
       final List<String> parentLocales = getParentLocales(locale);
-      result = new ParsedStringPack(inputStream, parentLocales, null);
+      result = new ParsedStringPack(inputStream, parentLocales, mappedByteBuffer);
     } catch (IOException exception) {
       SpLog.e("translations/loadData error:" + exception);
     }
@@ -182,6 +203,90 @@ public class StringPacks {
   }
 
   private static String getPackFileName(Locale locale) {
-    return "strings_" + locale.getLanguage() + ".pack";
+    return "strings_" + locale.getLanguage();
+  }
+
+  /**
+   * Extract a pack file to internal files directory for mmapping.
+   *
+   * @param context
+   * @param fileName file name of the pack file
+   * @param resources resources in which pack file is stored
+   * @param resourcePackFileName resource pack file name
+   * @return extracted pack file handle
+   * @throws IOException
+   */
+  @NonNull
+  private static File extractPackFile(
+      final Context context,
+      @NonNull String fileName,
+      @NonNull Resources resources,
+      @NonNull String resourcePackFileName)
+      throws IOException {
+    File filesDirectory = context.getFilesDir();
+    String extractedPackFileName =
+        fileName + UNDERSCORE + getPackageCodePathTimestamp(context) + PACK_FILE_EXTENSION;
+    File extractedPackFile = new File(filesDirectory, extractedPackFileName);
+
+    if (!extractedPackFile.exists()) {
+      File tempFile = new File(filesDirectory, TEMP_PACK_FILE);
+      OutputStream out = new FileOutputStream(tempFile);
+      FileUtils.copyStream(resources.getAssets().open(resourcePackFileName), out);
+      out.close();
+      boolean rename = tempFile.renameTo(extractedPackFile);
+      if (!rename) {
+        throw new IOException("Renaming temp file failed");
+      }
+    }
+    return extractedPackFile;
+  }
+
+  /**
+   * Return the timestamp of the package code path. This is used to differentiate two version
+   * installations of the app.
+   *
+   * @param context
+   * @return
+   */
+  private static long getPackageCodePathTimestamp(final Context context) {
+    return new File(context.getPackageCodePath()).lastModified() / 1000;
+  }
+
+  /**
+   * Clean up old pack files from internal file storage
+   *
+   * @param context
+   */
+  public static void cleanupOldPackFiles(Context context) {
+    File filesDirectory = context.getFilesDir();
+    FilenameFilter filenameFilter =
+        (dir, name) ->
+            name.endsWith(PACK_FILE_EXTENSION) || name.endsWith(TEMP_PACK_FILE_EXTENSION);
+
+    String[] filesNames = filesDirectory.list(filenameFilter);
+
+    if (filesNames != null) {
+      for (String fileName : filesNames) {
+        String filePrefix = fileName.substring(0, fileName.lastIndexOf(PACK_FILE_EXTENSION));
+        String[] splitName = filePrefix.split(UNDERSCORE);
+        if (splitName.length > 1) {
+          try {
+            if (Long.parseLong(splitName[splitName.length - 1])
+                != getPackageCodePathTimestamp(context)) {
+              SpLog.i("translations/cleanupOldPackFiles Clearing old pack file: " + fileName);
+              boolean isDeleted = new File(filesDirectory, fileName).delete();
+              if (!isDeleted) {
+                SpLog.e(
+                    "translations/cleanupOldPackFiles Could not delete old pack file: " + fileName);
+              }
+            }
+          } catch (NumberFormatException e) {
+            SpLog.w(
+                "translations/cleanupOldPackFiles Pack file name did not contain version info: "
+                    + fileName);
+          }
+        }
+      }
+    }
   }
 }

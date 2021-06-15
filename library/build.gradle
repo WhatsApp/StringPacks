@@ -16,6 +16,7 @@ apply from: 'release.gradle'
 dependencies {
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.collection:collection:1.1.0"
+    implementation "androidx.core:core:1.2.0"
 
     testImplementation "junit:junit:4.12"
     testImplementation "org.robolectric:robolectric:4.2.1"
