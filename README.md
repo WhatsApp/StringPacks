@@ -128,12 +128,16 @@ protected void attachBaseContext(Context base) {
   StringPackIds.registerStringPackIds();
   StringPacks.getInstance().setUp(base);
 
-  super.attachBaseContext(StringPackContext.wrap(base));
+  super.attachBaseContext(base);
 }
 
+private @Nullable StringPackResources stringPackResources;
 @Override
-public Context getBaseContext() {
-  return ContextUtils.getRootContext(super.getBaseContext());
+public Resources getResources() {
+  if (stringPackResources == null) {
+    stringPackResources = StringPackResources.wrap(super.getResources());
+  }
+  return stringPackResources;
 }
 ```
 
@@ -144,11 +148,15 @@ override fun attachBaseContext(base: Context?) {
     registerStringPackIds()
     StringPacks.getInstance().setUp(base)
 
-    super.attachBaseContext(StringPackContext.wrap(base))
+    super.attachBaseContext(base)
 }
 
-override fun getBaseContext(): Context {
-  return ContextUtils.getRootContext(super.getBaseContext())
+private @Nullable var stringPackResources:Resources? = null
+override fun getResources(): Resources? {
+  if (stringPackResources == null) {
+    stringPackResources = StringPackResources.wrap(super.getResources())
+  }
+  return stringPackResources
 }
 ```
 

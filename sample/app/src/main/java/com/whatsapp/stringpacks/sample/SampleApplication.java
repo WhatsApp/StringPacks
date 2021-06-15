@@ -9,25 +9,31 @@ package com.whatsapp.stringpacks.sample;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import androidx.annotation.NonNull;
-import com.whatsapp.stringpacks.StringPackContext;
+import androidx.annotation.Nullable;
+import com.whatsapp.stringpacks.StringPackResources;
 import com.whatsapp.stringpacks.StringPackUtils;
 import com.whatsapp.stringpacks.StringPacks;
-import com.whatsapp.stringpacks.utils.ContextUtils;
 import java.util.Locale;
 
 public class SampleApplication extends Application {
+
+  @Nullable private StringPackResources stringPackResources = null;
 
   @Override
   protected void attachBaseContext(Context base) {
     StringPackIds.registerStringPackIds();
     StringPacks.getInstance().setUp(base);
-    super.attachBaseContext(StringPackContext.wrap(base));
+    super.attachBaseContext(base);
   }
 
   @Override
-  public Context getBaseContext() {
-    return ContextUtils.getRootContext(super.getBaseContext());
+  public Resources getResources() {
+    if (stringPackResources == null) {
+      stringPackResources = StringPackResources.wrap(super.getResources());
+    }
+    return stringPackResources;
   }
 
   @Override
