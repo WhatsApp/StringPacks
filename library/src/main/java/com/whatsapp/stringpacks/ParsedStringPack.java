@@ -9,7 +9,6 @@ package com.whatsapp.stringpacks;
 import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,20 +18,14 @@ public class ParsedStringPack {
   @NonNull private final ConcurrentHashMap<Integer, String> strings = new ConcurrentHashMap<>();
   @NonNull private final ConcurrentHashMap<Integer, String[]> plurals = new ConcurrentHashMap<>();
 
-  @Nullable private LoadedStringPack loadedStringPack = null;
-
   @Nullable
   @SuppressLint("HungarianNotation")
   private MMappedStringPack mMappedStringPack;
 
   public ParsedStringPack(
-      @NonNull InputStream inputStream,
-      @NonNull List<String> parentLocales,
-      @Nullable MappedByteBuffer mappedPackFile) {
+      @NonNull List<String> parentLocales, @Nullable MappedByteBuffer mappedPackFile) {
     if (mappedPackFile != null) {
       mMappedStringPack = new MMappedStringPack(parentLocales, mappedPackFile);
-    } else {
-      loadedStringPack = new LoadedStringPack(inputStream, parentLocales);
     }
   }
 
@@ -40,24 +33,19 @@ public class ParsedStringPack {
     if (mMappedStringPack != null) {
       return mMappedStringPack.isEmpty();
     }
-    if (loadedStringPack != null) {
-      return loadedStringPack.isEmpty();
-    }
     return true;
   }
 
   @Nullable
-  public String getString(int id, final boolean readFromMMap) {
+  public String getString(int id) {
     final String result = strings.get(id);
     if (result != null) {
       return result;
     }
     // String not loaded or doesn't exist.
     String loadedString = null;
-    if (readFromMMap && mMappedStringPack != null) {
+    if (mMappedStringPack != null) {
       loadedString = mMappedStringPack.loadString(id);
-    } else if (loadedStringPack != null) {
-      loadedString = loadedStringPack.loadString(id);
     }
     if (loadedString != null) {
       strings.put(id, loadedString);
@@ -84,16 +72,13 @@ public class ParsedStringPack {
   }
 
   @Nullable
-  public String getQuantityString(
-      int id, Object quantity, @NonNull PluralRules pluralRules, final boolean readFromMMap) {
+  public String getQuantityString(int id, Object quantity, @NonNull PluralRules pluralRules) {
     String[] plural = plurals.get(id);
     if (plural == null) {
       // Plural set not loaded or doesn't exist.
       String[] loadedPlural = null;
-      if (readFromMMap && mMappedStringPack != null) {
+      if (mMappedStringPack != null) {
         loadedPlural = mMappedStringPack.loadPlural(id);
-      } else if (loadedStringPack != null) {
-        loadedPlural = loadedStringPack.loadPlural(id);
       }
       if (loadedPlural != null) {
         plurals.put(id, loadedPlural);

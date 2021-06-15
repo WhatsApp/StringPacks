@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -138,10 +137,9 @@ public class StringPacks {
       if (parsedStringPack != null) {
         if (isPlural) {
           // TODO better fix for the int / long interfaces.
-          translation =
-              parsedStringPack.getQuantityString(location, (long) quantity, pluralRules, true);
+          translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules);
         } else {
-          translation = parsedStringPack.getString(location, true);
+          translation = parsedStringPack.getString(location);
         }
       }
     }
@@ -164,7 +162,7 @@ public class StringPacks {
     ParsedStringPack result = null;
     String resourcePackFileName = fileName + PACK_FILE_EXTENSION;
 
-    try (InputStream inputStream = context.getAssets().open(resourcePackFileName)) {
+    try {
       MappedByteBuffer mappedByteBuffer = null;
       File extractedPackFile =
           extractPackFile(context, fileName, context.getResources(), resourcePackFileName);
@@ -173,7 +171,7 @@ public class StringPacks {
       mappedByteBuffer =
           fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, extractedPackFile.length());
       final List<String> parentLocales = getParentLocales(locale);
-      result = new ParsedStringPack(inputStream, parentLocales, mappedByteBuffer);
+      result = new ParsedStringPack(parentLocales, mappedByteBuffer);
     } catch (IOException exception) {
       SpLog.e("translations/loadData error:" + exception);
     }

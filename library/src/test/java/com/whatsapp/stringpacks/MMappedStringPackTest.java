@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,9 +59,7 @@ public class MMappedStringPackTest {
       MappedByteBuffer mappedByteBuffer =
           fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, bytes.length);
 
-      InputStream inputStream2 = new ByteArrayInputStream(baos.toByteArray());
-      parsedStringPack =
-          new ParsedStringPack(inputStream2, Collections.singletonList("zh"), mappedByteBuffer);
+      parsedStringPack = new ParsedStringPack(Collections.singletonList("zh"), mappedByteBuffer);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
     }
@@ -70,23 +67,23 @@ public class MMappedStringPackTest {
 
   @Test
   public void getString() {
-    String stringMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
+    String stringMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
     assertEquals("你好，世界", stringMMapped);
   }
 
   @Test
   public void getString_MultipleTimes() {
-    String firstMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
+    String firstMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
     assertEquals("你好，世界", firstMMapped);
 
-    String secondMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
+    String secondMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
     assertEquals("你好，世界", secondMMapped);
   }
 
   @Test
   public void getString_WithNonexistentId() {
     String nonexistentMMapped =
-        parsedStringPack.getString(StringPacksTestData.EXPECTED_STRINGS.length + 1, true);
+        parsedStringPack.getString(StringPacksTestData.EXPECTED_STRINGS.length + 1);
     assertNull(nonexistentMMapped);
   }
 
@@ -94,7 +91,7 @@ public class MMappedStringPackTest {
   public void getPlural_WithNonexistentId() {
     String nonexistentMMapped =
         parsedStringPack.getQuantityString(
-            StringPacksTestData.PLURALS_ID + 1, 2, StringPacksTestData.TEST_PLURAL_RULES, true);
+            StringPacksTestData.PLURALS_ID + 1, 2, StringPacksTestData.TEST_PLURAL_RULES);
     assertNull(nonexistentMMapped);
   }
 
@@ -104,10 +101,7 @@ public class MMappedStringPackTest {
     for (int i = 0; i < expectedQuantityStrings.length; i++) {
       String string =
           parsedStringPack.getQuantityString(
-              StringPacksTestData.PLURALS_ID,
-              (long) i,
-              StringPacksTestData.TEST_PLURAL_RULES,
-              true);
+              StringPacksTestData.PLURALS_ID, (long) i, StringPacksTestData.TEST_PLURAL_RULES);
       assertEquals(expectedQuantityStrings[i], string);
     }
   }
@@ -122,7 +116,7 @@ public class MMappedStringPackTest {
 
     Callable<String> getStringTaskMMap =
         () -> {
-          String string = parsedStringPack.getString(StringPacksTestData.STRING_ID, true);
+          String string = parsedStringPack.getString(StringPacksTestData.STRING_ID);
           latch.countDown();
           return string;
         };
@@ -163,7 +157,7 @@ public class MMappedStringPackTest {
           () -> {
             List<String> outcome = new ArrayList<>();
             outcome.add(StringPacksTestData.EXPECTED_STRINGS[nextRandomNumber]);
-            outcome.add(parsedStringPack.getString(nextRandomNumber, true));
+            outcome.add(parsedStringPack.getString(nextRandomNumber));
             latch.countDown();
             return outcome;
           });
@@ -203,8 +197,7 @@ public class MMappedStringPackTest {
                 parsedStringPack.getQuantityString(
                     StringPacksTestData.PLURALS_ID,
                     (long) i,
-                    StringPacksTestData.TEST_PLURAL_RULES,
-                    true);
+                    StringPacksTestData.TEST_PLURAL_RULES);
           }
           latch.countDown();
           return result;
