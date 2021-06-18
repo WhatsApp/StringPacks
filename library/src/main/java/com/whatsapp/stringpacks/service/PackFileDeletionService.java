@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
-import com.whatsapp.stringpacks.BuildConfig;
 import com.whatsapp.stringpacks.SpLog;
 import com.whatsapp.stringpacks.StringPacks;
 
@@ -20,7 +19,7 @@ public class PackFileDeletionService extends JobIntentService {
   private static final int PACK_FILE_DELETE_JOB_ID = 1;
 
   public static final String ACTION_PACK_FILE_DELETE =
-      BuildConfig.LIBRARY_PACKAGE_NAME + ".action.PACK_FILE_DELETE";
+      "com.whatsapp.stringpacks.action.PACK_FILE_DELETE";
 
   public static void start(Context context, Intent intent) {
     JobIntentService.enqueueWork(
