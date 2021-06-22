@@ -203,6 +203,10 @@ public class StringPacks {
   }
 
   private static String getPackFileName(Locale locale) {
+    //Ideally, we need to check if the .pack file exists,
+    //but adding this hack to check if it works.
+    if (!locale.getCountry().equals(""))
+      return "strings_" + locale.getLanguage() + "-r" + locale.getCountry();
     return "strings_" + locale.getLanguage();
   }
 
