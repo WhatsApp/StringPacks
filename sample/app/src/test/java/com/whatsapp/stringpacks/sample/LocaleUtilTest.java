@@ -49,6 +49,12 @@ public class LocaleUtilTest {
       Assert.fail("Test setup failure" + e);
     }
     try {
+      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_zh-rTW.pack");
+      when(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream);
+    } catch (IOException e) {
+      Assert.fail("Test setup failure" + e);
+    }
+    try {
       InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_ha-rNG.pack");
       when(assetManager.open("strings_ha-rNG.pack")).thenReturn(inputStream);
     } catch (IOException e) {
@@ -60,6 +66,14 @@ public class LocaleUtilTest {
   public void testChineseLanguage() {
     LocaleUtil.overrideCustomLanguage(application, "zh");
     assertEquals(configuration.locale.getLanguage(), "zh");
+    assertEquals(configuration.locale.getCountry(), "");
+  }
+
+  @Test
+  public void testChineseTaiwanLanguage() {
+    LocaleUtil.overrideCustomLanguage(application, "zh-TW");
+    assertEquals(configuration.locale.getLanguage(), "zh");
+    assertEquals(configuration.locale.getCountry(), "TW");
   }
 
   @Test
