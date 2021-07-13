@@ -55,8 +55,8 @@ public class LocaleUtilTest {
       Assert.fail("Test setup failure" + e);
     }
     try {
-      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_ha-rNG.pack");
-      when(assetManager.open("strings_ha-rNG.pack")).thenReturn(inputStream);
+      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_ha.pack");
+      when(assetManager.open("strings_ha.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
     }
