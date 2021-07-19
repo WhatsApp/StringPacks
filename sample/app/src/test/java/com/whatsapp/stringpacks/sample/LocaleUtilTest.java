@@ -43,19 +43,19 @@ public class LocaleUtilTest {
     when(resources.getConfiguration()).thenReturn(configuration);
     when(resources.getAssets()).thenReturn(assetManager);
     try {
-      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_zh.pack");
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh.pack");
       when(assetManager.open("strings_zh.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
     }
     try {
-      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_zh-rTW.pack");
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
       when(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
     }
     try {
-      InputStream inputStream = ApplicationProvider.getApplicationContext().getAssets().open("strings_ha.pack");
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_ha.pack");
       when(assetManager.open("strings_ha.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
