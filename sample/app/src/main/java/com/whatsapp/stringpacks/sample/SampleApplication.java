@@ -15,15 +15,19 @@ import androidx.annotation.Nullable;
 import com.whatsapp.stringpacks.StringPackResources;
 import com.whatsapp.stringpacks.StringPackUtils;
 import com.whatsapp.stringpacks.StringPacks;
+import com.whatsapp.stringpacks.StringPacksLocaleMetaDataProvider;
+
 import java.util.Locale;
 
 public class SampleApplication extends Application {
 
   @Nullable private StringPackResources stringPackResources = null;
+  @Nullable private final StringPacksLocaleMetaDataProvider metaData = new LocaleMetaDataProviderImpl();
 
   @Override
   protected void attachBaseContext(Context base) {
     StringPackIds.registerStringPackIds();
+    StringPacks.registerStringPackLocaleMetaData(metaData);
     StringPacks.getInstance().setUp(base);
     super.attachBaseContext(base);
   }

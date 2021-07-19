@@ -4,5 +4,8 @@
   ],
   "assets_directory": "app/src/main/assets",
   "pack_ids_class_file_path": "app/src/main/java/com/whatsapp/stringpacks/sample/StringPackIds.java",
-  "pack_scripts_directory": "../library/scripts/"
+  "pack_scripts_directory": "../library/scripts/",
+  "pack_id_mapping": {
+    "ha-rNG": "ha"
+  }
 }

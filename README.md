@@ -166,6 +166,50 @@ override fun getResources(): Resources? {
 
 You only need to do this each time you add a new context component. You don't need to do this for each component if you add them to a base class.
 
+### Region specific locales
+
+You can map multiple regions into a single `.pack` file using `pack_id_mapping` in [config.json](library/templates/config.json). For example
+
+```json
+pack_id_mapping = {
+  "es-rMX": "es",
+  "es-rES": "es"
+}
+```
+
+Here, both `"es-MX"` and `"es-ES"` locales would be packed into a single pack file. But locales like `"zh-TW"` and `"zh-CN"` shouldn't be mapped to `"zh"` because they are written in different scripts.
+
+To support region specific locales, you need to implement [StringPacksLocaleMetaDataProvider.java](library/src/main/java/com/whatsapp/stringpacks/StringPacksLocaleMetaDataProvider.java) and register the provider in your custom application.
+
+```java
+// Java
+
+@Nullable private final StringPacksLocaleMetaDataProvider metaData = new LocaleMetaDataProviderImpl();
+@Override
+protected void attachBaseContext(Context base) {
+  StringPackIds.registerStringPackIds();
+  StringPacks.registerStringPackLocaleMetaData(metaData);
+  StringPacks.getInstance().setUp(base);
+
+  super.attachBaseContext(base);
+}
+```
+
+```kotlin
+// Kotlin
+
+private @Nullable var metaData:StringPacksLocaleMetaDataProvider? = LocaleMetaDataProviderImpl()
+override fun attachBaseContext(base: Context?) {
+  registerStringPackIds();
+  StringPacks.registerStringPackLocaleMetaData(metaData);
+  StringPacks.getInstance().setUp(base);
+
+  super.attachBaseContext(base);
+}
+```
+
+Take a look at [LocaleMetaDataProviderImpl.java](sample/app/src/main/java/com/whatsapp/stringpacks/sample/LocaleMetaDataProviderImpl.java)  in the sample app for reference.
+
 ### Generate `.pack` files
 
 You have added the `StringPackIds` file to your project, but it has nothing in it yet. It is supposed to hold the mapping from android resource IDs (`R.string`) to string pack IDs.
