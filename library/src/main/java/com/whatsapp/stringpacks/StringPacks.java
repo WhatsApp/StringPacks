@@ -205,7 +205,7 @@ public class StringPacks {
       parents.add(locale.getLanguage());
     }
     if (stringPacksLocaleMetaDataProvider != null) {
-      String parent = stringPacksLocaleMetaDataProvider.getParentLocaleForLocale(locale);
+      String parent = stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(locale);
       if (parent != null)
         parents.add(parent);
     }

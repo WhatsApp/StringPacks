@@ -30,7 +30,7 @@ public class LocaleMetaDataProviderImpl implements StringPacksLocaleMetaDataProv
     }
 
     @Override
-    public String getParentLocaleForLocale(Locale locale) {
+    public String getFirstChoiceLocaleInPackFileForLocale(Locale locale) {
         if (locale.getCountry().equals(""))
             return null;
         return String.format("%s-%s", locale.getLanguage(), locale.getCountry());
