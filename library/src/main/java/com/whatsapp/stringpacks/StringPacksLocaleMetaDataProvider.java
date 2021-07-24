@@ -34,7 +34,7 @@ public interface StringPacksLocaleMetaDataProvider {
      * So, for locales "zh-TW" and "zh-CN", you should return
      * "zh-rTW" and "zh-rCN" respectively for the packFileId.
      *
-     * @param locale - The new locale application switches to
+* @param locale - Locale application wants to fetch the packId for
      * @return packId or null if same as locale's language
      */
     String getPackFileIdForLocale(Locale locale);
@@ -45,8 +45,8 @@ public interface StringPacksLocaleMetaDataProvider {
      * even if they are packed together, because zh is written in a different script than zh-TW.
      * Applications have to handle their special cases
      * and return true or false based on their specific cases.
-     * @param locale - The new locale application switches to
-     * @return false for all special cases, true otherwise
+* @param locale - Locale for which whether we want language as a fallback locale or not.
+* @return true if keeping language as fallback, false otherwise
      */
     boolean shouldAddLanguageAsParentForLocale(Locale locale);
 
@@ -54,8 +54,8 @@ public interface StringPacksLocaleMetaDataProvider {
      * Applications can decide whether to fallback to any specific locale
      * and not necessarily just the language.
      * For example, zh cannot be a fallback locale for zh-TW
-     * @param locale - The new locale application switches to
-     * @return The languageTag representing the locale for special cases, null otherwise
+* @param locale
+* @return The languageTag representing the locale in pack file, null otherwise
      */
-    String getParentLocaleForLocale(Locale locale);
+String getFirstChoiceLocaleInPackFileForLocale(Locale locale);
 }

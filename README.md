@@ -166,7 +166,7 @@ override fun getResources(): Resources? {
 
 You only need to do this each time you add a new context component. You don't need to do this for each component if you add them to a base class.
 
-### Region specific locales
+### Region specific locales & Fallback
 
 You can map multiple regions into a single `.pack` file using `pack_id_mapping` in [config.json](library/templates/config.json). For example
 
@@ -177,9 +177,12 @@ pack_id_mapping = {
 }
 ```
 
-Here, both `"es-MX"` and `"es-ES"` locales would be packed into a single pack file. But locales like `"zh-TW"` and `"zh-CN"` shouldn't be mapped to `"zh"` because they are written in different scripts.
+Here, translations in `"es"`, `"es-MX"` and `"es-ES"` locales would be packed into `strings_es.pack` file.
 
-To support region specific locales, you need to implement [StringPacksLocaleMetaDataProvider.java](library/src/main/java/com/whatsapp/stringpacks/StringPacksLocaleMetaDataProvider.java) and register the provider in your custom application.
+If you are supporting any of the following features, you need to implement [StringPacksLocaleMetaDataProvider.java](library/src/main/java/com/whatsapp/stringpacks/StringPacksLocaleMetaDataProvider.java) and register the provider in your custom `Application` class
+1. Packing translations for multiple locales (for example, `es-MX`, `es`) in to one `.pack` file, or 
+2. Fallback feature, or 
+3. Supporting region specific locales
 
 ```java
 // Java
