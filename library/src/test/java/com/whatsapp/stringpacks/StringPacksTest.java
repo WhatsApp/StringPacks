@@ -48,7 +48,7 @@ public class StringPacksTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
+    MockitoAnnotations.initMocks(this);
     application = spy(ApplicationProvider.getApplicationContext());
     when(application.getResources()).thenReturn(resources);
     when(application.getApplicationContext()).thenReturn(null);

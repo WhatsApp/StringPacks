@@ -9,13 +9,9 @@ package com.whatsapp.stringpacks;
 import java.util.Locale;
 
 /**
- * This interface specifies the methods that the application can override
- * to support region specific locales.
- *
- * If all the region specific locales are mapped in `pack_id_mapping` in
  * Implement this interface if your application is doing either of these: -
  * 1. Region specific translations, for example, having values-es-rES/strings.xml and values-es-rMX/strings.xml, or
- * 2. Are packing translations for multiple locales into a single .pack file via `pack_id_mapping`, or
+ * 2. Packing translations for multiple locales into a single `.pack` file via `pack_id_mapping`, or
  * 3. Want fallback feature to work, for example, return `es` translation if a translation is missing in `es-MX`
  */
 public interface StringPacksLocaleMetaDataProvider {
