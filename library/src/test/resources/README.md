@@ -74,6 +74,13 @@ This file is generated from `res/values-zh-rTW/strings.xml` with the following c
 
 This file is generated from `res/values-ha-rNG/strings.xml` with the following content.
 
+`ha-rNG` is mapped to `ha` using `pack_id_mapping`
+```json
+"pack_id_mapping": {
+    "ha-rNG": "ha"
+}
+```
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 
