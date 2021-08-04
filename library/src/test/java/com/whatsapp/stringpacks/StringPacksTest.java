@@ -72,7 +72,7 @@ public class StringPacksTest {
     }
     StringPacks.getInstance()
         .register(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
-    StringPacks.registerStringPackLocaleMetaData(stringPacksLocaleMetaDataProvider);
+    StringPacks.registerStringPackLocaleMetaDataProvider(stringPacksLocaleMetaDataProvider);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class StringPacksTest {
   }
 
   @Test
-  public void testLanguageChangeFromChineseTaiwanToEnglish() {
+  public void testSetUpApplicationInChineseTaiwan() {
     configuration.locale = zhTWLocale;
     when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("zh-rTW");
     when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(false);
@@ -105,19 +105,12 @@ public class StringPacksTest {
     stringPacks.setUp(application);
     String zhTWString = stringPacks.getString(StringPacksTestData.STRING_ID);
     assertEquals("你好，世界", zhTWString);
-
-    // Switch language to en-US
-    configuration.locale = enLocale;
-    when(resources.getString(anyInt())).thenReturn("Test");
-    stringPacks.setUp(application);
-    String enString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("Test", enString);
   }
 
   @Test
-  public void testLanguageChangeFromHausaNigeriaToEnglish() {
+  public void testSetUpApplicationInHausaNigeria() {
     configuration.locale = haNGLocale;
-    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("ha");
+    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn(null);
     when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
     when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("ha-NG");
     StringPacks stringPacks = StringPacks.getInstance();
@@ -125,54 +118,5 @@ public class StringPacksTest {
     stringPacks.setUp(application);
     String haString = stringPacks.getString(StringPacksTestData.STRING_ID);
     assertEquals("Sannu Duniya", haString);
-
-    // Switch language to en-US
-    configuration.locale = enLocale;
-    when(resources.getString(anyInt())).thenReturn("Test");
-    stringPacks.setUp(application);
-    String enString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("Test", enString);
-  }
-
-  @Test
-  public void testLanguageChangeToChineseTaiwan() {
-    configuration.locale = zhLocale;
-    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("zh");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
-    StringPacks stringPacks = StringPacks.getInstance();
-    // Setting up with Chinese
-    stringPacks.setUp(application);
-    String zhString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", zhString);
-
-    // Switch language to zh-TW
-    configuration.locale = zhTWLocale;
-    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("zh-rTW");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(false);
-    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("zh-TW");
-    stringPacks.setUp(application);
-    String zhTaiwanString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", zhTaiwanString);
-  }
-
-  @Test
-  public void testLanguageChangeToHausaNigeria() {
-    configuration.locale = zhLocale;
-    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn(null);
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
-    StringPacks stringPacks = StringPacks.getInstance();
-    // Setting up with Chinese
-    stringPacks.setUp(application);
-    String zhString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", zhString);
-
-    // Switch language to ha-NG
-    configuration.locale = haNGLocale;
-    when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn(null);
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(false);
-    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("ha-NG");
-    stringPacks.setUp(application);
-    String haNigeriaString = stringPacks.getString(StringPacksTestData.STRING_ID);
-    assertEquals("Sannu Duniya", haNigeriaString);
   }
 }

@@ -22,12 +22,12 @@ import java.util.Locale;
 public class SampleApplication extends Application {
 
   @Nullable private StringPackResources stringPackResources = null;
-  @Nullable private final StringPacksLocaleMetaDataProvider metaData = new LocaleMetaDataProviderImpl();
+  @Nullable private final StringPacksLocaleMetaDataProvider metaDataProvider = new LocaleMetaDataProviderImpl();
 
   @Override
   protected void attachBaseContext(Context base) {
     StringPackIds.registerStringPackIds();
-    StringPacks.registerStringPackLocaleMetaData(metaData);
+    StringPacks.registerStringPackLocaleMetaDataProvider(metaDataProvider);
     StringPacks.getInstance().setUp(base);
     super.attachBaseContext(base);
   }

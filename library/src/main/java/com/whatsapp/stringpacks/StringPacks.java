@@ -110,9 +110,9 @@ public class StringPacks {
     return resources;
   }
 
-  public static void registerStringPackLocaleMetaData(
-          @Nullable StringPacksLocaleMetaDataProvider metaData) {
-    stringPacksLocaleMetaDataProvider = metaData;
+  public static void registerStringPackLocaleMetaDataProvider(
+          @Nullable StringPacksLocaleMetaDataProvider metaDataProvider) {
+    stringPacksLocaleMetaDataProvider = metaDataProvider;
   }
 
   /** Registers map of app resource IDs to stringpack IDs. Called once at app start. */
