@@ -72,7 +72,7 @@ This file is generated from `res/values-zh-rTW/strings.xml` with the following c
 
 ## strings_ha.pack
 
-This file is generated from `res/values-ha-rNG/strings.xml` with the following content.
+This file is generated from `res/values-ha-rNG/strings.xml` and `res/values-ha/strings.xml` with the following content.
 
 `ha-rNG` is mapped to `ha` using `pack_id_mapping`
 ```json
@@ -81,6 +81,7 @@ This file is generated from `res/values-ha-rNG/strings.xml` with the following c
 }
 ```
 
+`res/values-ha-rNG/strings.xml`
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 
@@ -89,7 +90,6 @@ This file is generated from `res/values-ha-rNG/strings.xml` with the following c
     <string name="hello_africa">Sannu afirka</string>
     <string name="hello_asia">Sannu asia</string>
     <string name="hello_antartica">Sannu Antarctica</string>
-    <string name="hello_north_america">Barka dai arewacin amurka</string>
     <string name="hello_south_america">Barka dai, Amurka ta Kudu</string>
     <string name="hello_australia">Barka dai australia</string>
     <string name="hello_europe">Sannu turai</string>
@@ -108,6 +108,15 @@ This file is generated from `res/values-ha-rNG/strings.xml` with the following c
         <item quantity="many">mafi</item>
         <item quantity="other">wasu</item>
     </plurals>
+</resources>
+```
+
+`res/values-ha/strings.xml`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="hello_north_america">Barka dai arewacin amurka</string>
 </resources>
 ```
 
