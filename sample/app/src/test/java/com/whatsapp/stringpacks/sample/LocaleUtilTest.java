@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class LocaleUtilTest {
@@ -47,12 +48,32 @@ public class LocaleUtilTest {
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
     }
+    try {
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
+      when(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream);
+    } catch (IOException e) {
+      Assert.fail("Test setup failure" + e);
+    }
+    try {
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_ha.pack");
+      when(assetManager.open("strings_ha.pack")).thenReturn(inputStream);
+    } catch (IOException e) {
+      Assert.fail("Test setup failure" + e);
+    }
   }
 
   @Test
   public void testChineseLanguage() {
     LocaleUtil.overrideCustomLanguage(application, "zh");
     assertEquals(configuration.locale.getLanguage(), "zh");
+    assertEquals(configuration.locale.getCountry(), "");
+  }
+
+  @Test
+  public void testChineseTaiwanLanguage() {
+    LocaleUtil.overrideCustomLanguage(application, "zh-TW");
+    assertEquals(configuration.locale.getLanguage(), "zh");
+    assertEquals(configuration.locale.getCountry(), "TW");
   }
 
   @Test
@@ -60,5 +81,12 @@ public class LocaleUtilTest {
     LocaleUtil.overrideCustomLanguage(application, "en-US");
     assertEquals(configuration.locale.getLanguage(), "en");
     assertEquals(configuration.locale.getCountry(), "US");
+  }
+
+  @Test
+  public void testHausaNigeriaLanguage() {
+    LocaleUtil.overrideCustomLanguage(application, "ha-NG");
+    assertEquals(configuration.locale.getLanguage(), "ha");
+    assertEquals(configuration.locale.getCountry(), "NG");
   }
 }

@@ -5,6 +5,6 @@
 *~
 .DS_Store
 .gradle/
-/.idea/**
+.idea/
 build/
 local.properties

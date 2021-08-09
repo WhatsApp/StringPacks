@@ -31,6 +31,7 @@ public class StringPacksTestData {
       };
 
   static int PLURALS_ID = 0;
+  static int FALLBACK_STRING_ID = 11;
   static int STRING_ID = 15;
   static String[] EXPECTED_STRINGS = {
     null, "你好非洲", "南极洲你好", "你好北冰洋", "你好亚洲", "你好大西洋", "澳大利亚你好", "您好欧洲", "你好森林", "你好印度洋", "你好山",

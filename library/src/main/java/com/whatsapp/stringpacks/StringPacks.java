@@ -64,6 +64,9 @@ public class StringPacks {
   @Nullable
   private ParsedStringPack parsedStringPack;
 
+  @Nullable
+  private static StringPacksLocaleMetaDataProvider stringPacksLocaleMetaDataProvider;
+
   /** Set up the library with latest locale at the start of the app, or on a locale change */
   public void setUp(@NonNull Context context) {
     // Read locale from context instead of appRes in case there is an overridden custom locale.
@@ -105,6 +108,11 @@ public class StringPacks {
     }
 
     return resources;
+  }
+
+  public static void registerStringPackLocaleMetaDataProvider(
+          @Nullable StringPacksLocaleMetaDataProvider metaDataProvider) {
+    stringPacksLocaleMetaDataProvider = metaDataProvider;
   }
 
   /** Registers map of app resource IDs to stringpack IDs. Called once at app start. */
@@ -192,7 +200,15 @@ public class StringPacks {
    */
   private static List<String> getParentLocales(@NonNull Locale locale) {
     final ArrayList<String> parents = new ArrayList<>();
-    parents.add(locale.getLanguage());
+    if (stringPacksLocaleMetaDataProvider == null
+            || stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(locale)) {
+      parents.add(locale.getLanguage());
+    }
+    if (stringPacksLocaleMetaDataProvider != null) {
+      String parent = stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(locale);
+      if (parent != null)
+        parents.add(parent);
+    }
     return parents;
   }
 
@@ -203,7 +219,14 @@ public class StringPacks {
   }
 
   private static String getPackFileName(Locale locale) {
-    return "strings_" + locale.getLanguage();
+    String packFileId = null;
+    if (stringPacksLocaleMetaDataProvider != null) {
+      packFileId = stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(locale);
+    }
+    if (packFileId == null) {
+      packFileId = locale.getLanguage();
+    }
+    return "strings_" + packFileId;
   }
 
   /**
