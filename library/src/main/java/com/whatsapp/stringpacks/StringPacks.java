@@ -111,7 +111,7 @@ public class StringPacks {
   }
 
   public static void registerStringPackLocaleMetaDataProvider(
-          @Nullable StringPacksLocaleMetaDataProvider metaDataProvider) {
+      @Nullable StringPacksLocaleMetaDataProvider metaDataProvider) {
     stringPacksLocaleMetaDataProvider = metaDataProvider;
   }
 
@@ -201,7 +201,7 @@ public class StringPacks {
   private static List<String> getParentLocales(@NonNull Locale locale) {
     final ArrayList<String> parents = new ArrayList<>();
     if (stringPacksLocaleMetaDataProvider == null
-            || stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(locale)) {
+        || stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(locale)) {
       parents.add(locale.getLanguage());
     }
     if (stringPacksLocaleMetaDataProvider != null) {

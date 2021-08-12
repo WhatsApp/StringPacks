@@ -180,8 +180,8 @@ pack_id_mapping = {
 Here, translations in `"es"`, `"es-MX"` and `"es-ES"` locales would be packed into `strings_es.pack` file.
 
 If you are supporting any of the following features, you need to implement [StringPacksLocaleMetaDataProvider.java](library/src/main/java/com/whatsapp/stringpacks/StringPacksLocaleMetaDataProvider.java) and register the provider in your custom `Application` class
-1. Packing translations for multiple locales (for example, `es-MX`, `es`) in to one `.pack` file, or 
-2. Fallback feature, or 
+1. Packing translations for multiple locales (for example, `es-MX`, `es`) in to one `.pack` file, or
+2. Fallback feature, or
 3. Supporting region specific locales
 
 ```java
