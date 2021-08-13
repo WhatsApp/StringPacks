@@ -59,7 +59,8 @@ public class StringPacksTest {
       Assert.fail("Test setup failure" + e);
     }
     try {
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
+      InputStream inputStream =
+          getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
       when(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);
@@ -78,7 +79,8 @@ public class StringPacksTest {
   @Test
   public void testLanguageChangeFromChineseToEnglish() {
     when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("zh");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
+    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any()))
+        .thenReturn(true);
     StringPacks stringPacks = StringPacks.getInstance();
     configuration.locale = zhLocale;
     stringPacks.setUp(application);
@@ -96,8 +98,10 @@ public class StringPacksTest {
   @Test
   public void testSetUpApplicationInChineseTaiwan() {
     when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("zh-rTW");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(false);
-    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("zh-TW");
+    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any()))
+        .thenReturn(false);
+    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any()))
+        .thenReturn("zh-TW");
     StringPacks stringPacks = StringPacks.getInstance();
     configuration.locale = zhTWLocale;
     stringPacks.setUp(application);
@@ -108,8 +112,10 @@ public class StringPacksTest {
   @Test
   public void testSetUpApplicationInHausaNigeria() {
     when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("ha");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
-    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("ha-NG");
+    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any()))
+        .thenReturn(true);
+    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any()))
+        .thenReturn("ha-NG");
     StringPacks stringPacks = StringPacks.getInstance();
     configuration.locale = haNGLocale;
     stringPacks.setUp(application);
@@ -120,8 +126,10 @@ public class StringPacksTest {
   @Test
   public void testTranslationInFallbackLocale() {
     when(stringPacksLocaleMetaDataProvider.getPackFileIdForLocale(any())).thenReturn("ha");
-    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any())).thenReturn(true);
-    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any())).thenReturn("ha-NG");
+    when(stringPacksLocaleMetaDataProvider.shouldAddLanguageAsParentForLocale(any()))
+        .thenReturn(true);
+    when(stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(any()))
+        .thenReturn("ha-NG");
     StringPacks stringPacks = StringPacks.getInstance();
     configuration.locale = haNGLocale;
     stringPacks.setUp(application);

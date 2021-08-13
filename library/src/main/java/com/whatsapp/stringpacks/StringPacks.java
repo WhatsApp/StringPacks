@@ -64,8 +64,7 @@ public class StringPacks {
   @Nullable
   private ParsedStringPack parsedStringPack;
 
-  @Nullable
-  private static StringPacksLocaleMetaDataProvider stringPacksLocaleMetaDataProvider;
+  @Nullable private static StringPacksLocaleMetaDataProvider stringPacksLocaleMetaDataProvider;
 
   /** Set up the library with latest locale at the start of the app, or on a locale change */
   public void setUp(@NonNull Context context) {
@@ -205,9 +204,11 @@ public class StringPacks {
       parents.add(locale.getLanguage());
     }
     if (stringPacksLocaleMetaDataProvider != null) {
-      String parent = stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(locale);
-      if (parent != null)
+      String parent =
+          stringPacksLocaleMetaDataProvider.getFirstChoiceLocaleInPackFileForLocale(locale);
+      if (parent != null) {
         parents.add(parent);
+      }
     }
     return parents;
   }

@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class LocaleUtilTest {
@@ -49,7 +48,8 @@ public class LocaleUtilTest {
       Assert.fail("Test setup failure" + e);
     }
     try {
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
+      InputStream inputStream =
+          getClass().getClassLoader().getResourceAsStream("strings_zh-rTW.pack");
       when(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream);
     } catch (IOException e) {
       Assert.fail("Test setup failure" + e);

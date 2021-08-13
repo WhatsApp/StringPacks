@@ -16,13 +16,15 @@ import com.whatsapp.stringpacks.StringPackResources;
 import com.whatsapp.stringpacks.StringPackUtils;
 import com.whatsapp.stringpacks.StringPacks;
 import com.whatsapp.stringpacks.StringPacksLocaleMetaDataProvider;
-
 import java.util.Locale;
 
 public class SampleApplication extends Application {
 
   @Nullable private StringPackResources stringPackResources = null;
-  @Nullable private final StringPacksLocaleMetaDataProvider metaDataProvider = new LocaleMetaDataProviderImpl();
+
+  @Nullable
+  private final StringPacksLocaleMetaDataProvider metaDataProvider =
+      new LocaleMetaDataProviderImpl();
 
   @Override
   protected void attachBaseContext(Context base) {

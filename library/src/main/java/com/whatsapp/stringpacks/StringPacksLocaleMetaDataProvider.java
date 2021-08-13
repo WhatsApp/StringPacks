@@ -10,9 +10,12 @@ import java.util.Locale;
 
 /**
  * Implement this interface if your application is doing either of these: -
- * 1. Region specific translations, for example, having values-es-rES/strings.xml and values-es-rMX/strings.xml, or
- * 2. Packing translations for multiple locales into a single `.pack` file via `pack_id_mapping`, or
- * 3. Want fallback feature to work, for example, return `es` translation if a translation is missing in `es-MX`
+ * 1. Region specific translations, for example, having values-es-rES/strings.xml and
+ * values-es-rMX/strings.xml, or
+ * 2. Packing translations for multiple locales into a single `.pack` file via
+ * `pack_id_mapping`, or
+ * 3. Want fallback feature to work, for example, return `es` translation if a translation is
+ * missing in `es-MX`
  */
 public interface StringPacksLocaleMetaDataProvider {
   /**
