@@ -1,4 +1,4 @@
-*.pack
+**/assets/**
 .gradle/
 /.idea/**
 build/
