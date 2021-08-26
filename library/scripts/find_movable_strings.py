@@ -11,6 +11,7 @@ import math
 import re
 import subprocess
 from os import path
+from typing import Set
 from xml.etree import ElementTree
 
 import string_pack_config
@@ -205,12 +206,8 @@ def generate_kotlin_internal(string_pack_ids, method_name):
     return result
 
 
-def find_movable_strings(sp_config, print_reverse=False):
-    xml_files = subprocess.check_output(
-        sp_config.find_resource_files_command, shell=True, encoding="ASCII"
-    ).split("\n")
-
-    not_movable = set()
+def generate_non_movable_set(sp_config, xml_files) -> Set:
+    not_movable = sp_config.do_not_pack.copy()
     for filename in xml_files:
         if (
             not filename
@@ -221,6 +218,15 @@ def find_movable_strings(sp_config, print_reverse=False):
         not_movable.update(
             find_strings_used_in_xml(filename, sp_config.safe_widget_classes)
         )
+    return not_movable
+
+
+def find_movable_strings(sp_config, print_reverse=False):
+    xml_files = subprocess.check_output(
+        sp_config.find_resource_files_command, shell=True, encoding="ASCII"
+    ).split("\n")
+
+    not_movable = generate_non_movable_set(sp_config, xml_files)
 
     strings_to_move = set()
     for source_file in sp_config.get_default_string_files():
