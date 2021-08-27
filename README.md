@@ -2,7 +2,7 @@
 
 StringPacks is a library to store translation strings in a more efficient binary format for Android applications, so that it reduces the Android APK size.
 
-Check out [our tech talk on StringPacks from DroiCon SF 2019](https://youtu.be/npnamYPQD3g?t=812) to know more about the motivation, architecture and prospect of the StringPacks project.
+Check out [our tech talk on StringPacks from DroidCon SF 2019](https://youtu.be/npnamYPQD3g?t=812) to know more about the motivation, architecture and prospect of the StringPacks project.
 
 ## Requirements
 
