@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity
    * conditions
    * 1. minSdkVersion of the app is less than 17
    * 2. App has a dependency on androidx.appcompat:appcompat:1.2.0 or above (see
-   * <a href="https://github.com/WhatsApp/StringPacks/blob/master/sample/app/build.gradle#L39">build.gradle</a>)
+   * <a href="https://github.com/WhatsApp/StringPacks/blob/main/sample/app/build.gradle#L39">build.gradle</a>)
    * 3. Activity extends from {@code AppCompatActivity}
    *
    * <p>If any of the above constraints is false, there is no need to override this method
