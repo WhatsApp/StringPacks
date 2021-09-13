@@ -36,19 +36,10 @@ class TestPackStringsMethods(unittest.TestCase):
         )
 
     def test_do_not_pack_strings_not_packed_into_resource(self):
-        manual_non_movable = "manual"
         sp_config = string_pack_config.StringPackConfig()
-        sp_config.do_not_pack = set([manual_non_movable, "other_string"])
         self.assertSetEqual(
-            {
-                "other_string",
-                "string_array_two",
-                "string_array_one",
-                "style_text",
-                manual_non_movable,
-            },
-            sp_find.generate_non_movable_set(
-                sp_config,
-                [test_util.get_res_path("test_resources.xml")],
+            {"donotpack_string"},
+            sp_find.find_donotpack_strings(
+                test_util.get_res_path("test_resources.xml"),
             ),
         )

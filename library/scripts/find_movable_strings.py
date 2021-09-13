@@ -15,6 +15,7 @@ from typing import Set
 from xml.etree import ElementTree
 
 import string_pack_config
+from move_strings_for_packing import get_resource_content_without_header
 
 
 NAMESPACE_AND_ATTRIB_RE = re.compile("^\{(.+)\}(.+)$")
@@ -41,6 +42,16 @@ OK_NAMESPACES = {"http://schemas.android.com/tools"}
 # surrounding the list pieces so the developer can still easily use one statement
 # (getStringPacksMapping()) to use the generated code.
 MAX_IDS_PER_METHOD = 8000
+
+DONOTPACK_RE = re.compile('<(?:string|plurals) name="([^"]+)".*donotpack="true"')
+
+
+def find_donotpack_strings(filename):
+    result = set()
+    data = get_resource_content_without_header(filename)
+    for match in DONOTPACK_RE.finditer(data):
+        result.add(match.group(1))
+    return result
 
 
 def find_strings_used_in_xml(filename, safe_widgets):
@@ -207,13 +218,14 @@ def generate_kotlin_internal(string_pack_ids, method_name):
 
 
 def generate_non_movable_set(sp_config, xml_files) -> Set:
-    not_movable = sp_config.do_not_pack.copy()
+    not_movable = set()
     for filename in xml_files:
-        if (
-            not filename
-            # We assume strings.xml files only have declarations, no references.
-            or filename.endswith("/strings.xml")
-        ):
+        if not filename:
+            continue
+        if filename.endswith("/values/strings.xml"):
+            not_movable.update(find_donotpack_strings(filename))
+            continue
+        if filename.endswith("/strings.xml"):
             continue
         not_movable.update(
             find_strings_used_in_xml(filename, sp_config.safe_widget_classes)
@@ -232,8 +244,8 @@ def find_movable_strings(sp_config, print_reverse=False):
     for source_file in sp_config.get_default_string_files():
         with open(source_file) as english_sources:
             for match in NAME_CATCHER_RE.findall(english_sources.read()):
-                msg_type, msg_name = match
-                if msg_type == "string" and msg_name in not_movable:
+                msg_name = match[1]
+                if msg_name in not_movable:
                     if print_reverse:
                         print(msg_name)
                     continue

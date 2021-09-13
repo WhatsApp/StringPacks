@@ -23,5 +23,6 @@ See test_find_movable_strings.py.
         <item name="android:textColor">@color/style_color</item>
     </style>
 
-    <string nam="string_pack_string">@string/other_string</string>
+    <string name="string_pack_string">@string/other_string</string>
+    <string name="donotpack_string" donotpack="true">Do not pack</string>
 </resources>

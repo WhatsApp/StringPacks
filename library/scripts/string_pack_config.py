@@ -84,7 +84,6 @@ class StringPackConfig:
         "pack_ids_class_file_path",
         "pack_id_mapping",
         "pack_scripts_directory",
-        "do_not_pack",
     ]
 
     def __init__(self):
@@ -126,9 +125,6 @@ class StringPackConfig:
 
         # The directory that holds all the python scripts
         self.pack_scripts_directory = None
-
-        # The set of string resource name (without the prefix R.string.) that should not be packed.
-        self.do_not_pack = set()
 
     def load_from_file(self, config_json_file_path):
         """Load configuration from json file."""
