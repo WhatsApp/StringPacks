@@ -4,10 +4,10 @@
 # the LICENSE file in the root directory of this source tree.
 
 import collections
+import logging
 import os
 import re
 import sys
-import logging
 from xml.etree import ElementTree
 
 
@@ -191,13 +191,14 @@ class LocaleStore(object):
         blob_append_16_bit(blob, len(self.plurals))
         # Write the strings. Note that the parser in ParsedStringPack.java expects this to be
         # sorted by ID.
-        for id in sorted(self.strings):
+        # However the ids are already entered in sorted manner. So no need to re-sort them
+        for id in self.strings:
             blob_append_16_bit(blob, id)
             start, length = self.strings[id]
             blob_append_32_bit(blob, start)
             blob_append_16_bit(blob, length)
         # Write the plurals
-        for id in sorted(self.plurals):
+        for id in self.plurals:
             blob_append_16_bit(blob, id)
             plural = self.plurals[id]
             blob.append(len(plural))  # Just one byte
@@ -250,13 +251,13 @@ class StringPack(object):
         for locale in locales:
             blob_append_locale(self.locales_info, locale)
             locale_store = LocaleStore()
-            for id, value in self.store[locale].items():
+            for id in sorted(self.store[locale].keys()):
+                value = self.store[locale][id]
                 locale_store.add_plural_or_string(id, self.string_buffer.add(value))
             locale_blob = bytes(locale_store.get_binary_blob())
             blob_append_32_bit(self.locales_info, locale_blobs_total_size)  # start
             locale_blobs_total_size += len(locale_blob)
             self.locale_blobs.append(locale_blob)
-
         self.header_blob = bytearray()
         blob_append_16_bit(self.header_blob, len(locales))  # Number of locales
         blob_append_32_bit(
