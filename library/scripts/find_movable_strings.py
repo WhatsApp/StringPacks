@@ -7,6 +7,7 @@
 
 
 import argparse
+import logging
 import math
 import re
 import subprocess
@@ -17,6 +18,10 @@ from xml.etree import ElementTree
 import string_pack_config
 from move_strings_for_packing import get_resource_content_without_header
 
+
+# Escape code for color
+SET_WARNING_COLOR = "\033[33m\033[41m"  # yellow text with red background
+CLEAR_COLOR = "\033[0m"
 
 NAMESPACE_AND_ATTRIB_RE = re.compile("^\{(.+)\}(.+)$")
 
@@ -56,21 +61,33 @@ def find_donotpack_strings(filename):
 
 def find_strings_used_in_xml(filename, safe_widgets):
     result = set()
-    tree = ElementTree.parse(filename)
-    for node in tree.findall(".//"):
-        if node.tag in safe_widgets:
-            continue  # Certain widgets can handle @string just fine
-        if node.text is not None:
-            for string in STRING_USAGE_RE.findall(node.text):
-                result.add(string)
-        for key, value in node.attrib.items():
-            string_usage_match = STRING_USAGE_RE.search(value)
-            if string_usage_match:
-                namespace, attrib = separate_namespace(key)
-                if namespace in OK_NAMESPACES:
-                    continue  # Certain namespace are safe to use @string in
-                result.add(string_usage_match.group(1))
-    return result
+    # Ignore the file if it throws an error while parsing
+    # Started seeing this in some of the xml files, that were not layout files. We do not expect
+    # this error to be thrown in layout files or files that we are interested in
+    try:
+        tree = ElementTree.parse(filename)
+        for node in tree.findall(".//"):
+            if node.tag in safe_widgets:
+                continue  # Certain widgets can handle @string just fine
+            if node.text is not None:
+                for string in STRING_USAGE_RE.findall(node.text):
+                    result.add(string)
+            for key, value in node.attrib.items():
+                string_usage_match = STRING_USAGE_RE.search(value)
+                if string_usage_match:
+                    namespace, attrib = separate_namespace(key)
+                    if namespace in OK_NAMESPACES:
+                        continue  # Certain namespace are safe to use @string in
+                    result.add(string_usage_match.group(1))
+    except ElementTree.ParseError:
+        logging.warning(
+            SET_WARNING_COLOR
+            + "Dropping the file becase of ParseError: "
+            + filename
+            + CLEAR_COLOR
+        )
+    finally:
+        return result
 
 
 NAME_CATCHER_RE = re.compile('<(string|plurals) name="([^"]+)"')
