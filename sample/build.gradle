@@ -7,7 +7,7 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         
     }
     dependencies {
@@ -21,7 +21,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         // Uncomment it when testing the new version of the StringPacks library by pushing it to
         // the local maven repository.
