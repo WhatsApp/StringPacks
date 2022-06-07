@@ -234,12 +234,14 @@ class StringPack(object):
     def add_for_locale(self, locale, string_dict):
         locale_dict = self.store[locale]
         for key, value in string_dict.items():
-            if key in locale_dict:
-                logging.warning(
-                    "Warning: id {} being overridden by:{}, previous value:{}".format(
-                        key, value, locale_dict[key]
-                    )
-                )
+            # TODO: Uncomment this once the Warning is fixed. Commenting it temporarily as
+            # it throws a whole lots of Warnings that are non-actionable
+            # if key in locale_dict:
+            #    logging.warning(
+            #        "Warning: id {} being overridden by:{}, previous value:{}".format(
+            #            key, value, locale_dict[key]
+            #        )
+            #    )
             locale_dict[key] = value
 
     def compile(self):
