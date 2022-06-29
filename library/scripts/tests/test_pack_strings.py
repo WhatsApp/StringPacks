@@ -15,14 +15,16 @@ class TestPackStringsMethods(unittest.TestCase):
         self.sp_config.assets_directory = "app/src/main/assets/"
 
     def test_group_string_files_by_languages_without_mapping(self):
+        self.sp_config.languages_to_pack = ["*"]
+
         grouped_file_paths = pack_strings.group_string_files_by_languages(
-            {},
+            self.sp_config,
             [
                 "sp/app_src_main_res/values-cs/strings.xml",
                 "sp/app_src_main_res/values-sk/strings.xml",
                 "sp/coreui_src_main_res/values-cs/strings.xml",
                 "sp/coreui_src_main_res/values-sk/strings.xml",
-            ],
+            ]
         )
 
         self.assertEqual(2, len(grouped_file_paths))
@@ -43,8 +45,11 @@ class TestPackStringsMethods(unittest.TestCase):
         )
 
     def test_group_string_files_by_languages_with_mapping(self):
+        self.sp_config.languages_to_pack = ["*"]
+        self.sp_config.pack_id_mapping = {"sk": "cs"}
+
         grouped_file_paths = pack_strings.group_string_files_by_languages(
-            {"sk": "cs"},
+            self.sp_config,
             [
                 "sp/app_src_main_res/values-cs/strings.xml",
                 "sp/app_src_main_res/values-sk/strings.xml",
@@ -65,8 +70,11 @@ class TestPackStringsMethods(unittest.TestCase):
         )
 
     def test_group_string_files_by_languages_two_languages_with_mapping(self):
+        self.sp_config.languages_to_pack = ["*"]
+        self.sp_config.pack_id_mapping = {"sk": "cs"}
+
         grouped_file_paths = pack_strings.group_string_files_by_languages(
-            {"sk": "cs"},
+            self.sp_config,
             [
                 "sp/app_src_main_res/values-sk/strings.xml",
                 "sp/app_src_main_res/values-zh-rCN/strings.xml",
@@ -92,6 +100,44 @@ class TestPackStringsMethods(unittest.TestCase):
             },
             set(grouped_file_paths["zh-rCN"]),
         )
+
+    def test_group_string_files_by_custom_languages_to_pack_without_mapping(self):
+        self.sp_config.languages_to_pack = ["cs"]
+
+        grouped_file_paths = pack_strings.group_string_files_by_languages(
+            self.sp_config,
+            [
+                "sp/app_src_main_res/values-cs/strings.xml",
+                "sp/app_src_main_res/values-sk/strings.xml",
+                "sp/coreui_src_main_res/values-cs/strings.xml",
+                "sp/coreui_src_main_res/values-sk/strings.xml",
+            ]
+        )
+
+        self.assertEqual(1, len(grouped_file_paths))
+        self.assertSetEqual(
+            {
+                "sp/app_src_main_res/values-cs/strings.xml",
+                "sp/coreui_src_main_res/values-cs/strings.xml",
+            },
+            set(grouped_file_paths["cs"]),
+        )
+
+    def test_group_string_files_by_custom_languages_to_pack_empty_without_mapping(self):
+        self.sp_config.languages_to_pack = []
+
+        grouped_file_paths = pack_strings.group_string_files_by_languages(
+            self.sp_config,
+            [
+                "sp/app_src_main_res/values-cs/strings.xml",
+                "sp/app_src_main_res/values-sk/strings.xml",
+                "sp/coreui_src_main_res/values-cs/strings.xml",
+                "sp/coreui_src_main_res/values-sk/strings.xml",
+            ]
+        )
+
+        self.assertEqual(0, len(grouped_file_paths))
+
 
     def test_get_dest_pack_file_path_with_module(self):
         self.sp_config.module = "module"

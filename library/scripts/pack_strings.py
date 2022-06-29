@@ -15,7 +15,7 @@ import re
 
 import string_pack
 import string_pack_config
-
+from string_pack_config import LanguageHandlingCase
 
 class IdFinder(object):
     def __init__(self, sp_config):
@@ -34,17 +34,18 @@ class IdFinder(object):
         return None
 
 
-def group_string_files_by_languages(pack_id_mapping, packable_strings_file_paths):
+def group_string_files_by_languages(sp_config, packable_strings_file_paths):
+
     # A map from language (aka, pack ID) to list of string resource files.
     grouped_files = collections.defaultdict(list)
 
     for strings_file in packable_strings_file_paths:
         values_dir_name = os.path.normpath(strings_file).split(os.sep)[-2]
         language = values_dir_name.replace("values-", "")
-
-        pack_id = pack_id_mapping.get(language, language)
-
-        grouped_files[pack_id].append(strings_file)
+        handler_case = sp_config.get_handling_case(language)
+        if handler_case == LanguageHandlingCase.PACK:
+            pack_id = sp_config.pack_id_mapping.get(language, language)
+            grouped_files[pack_id].append(strings_file)
 
     return grouped_files
 
@@ -70,7 +71,7 @@ def pack_strings(sp_config, plural_handler):
         )
 
     grouped_strings_file_paths = group_string_files_by_languages(
-        sp_config.pack_id_mapping, packable_strings_file_paths
+        sp_config, packable_strings_file_paths
     )
 
     # Create assets directory in case it does not exist.
