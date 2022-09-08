@@ -20,7 +20,14 @@ Check out [our tech talk on StringPacks from DroidCon SF 2019](https://youtu.be/
     - Edit package information of the file.
 3. Move [template config.json](library/templates/config.json) to your Android application project directory.
     - Replace `{app}` to be your application project directory name.
-    - Point `pack_ids_class_file_path` to the path where you put the `StringPackIds` file.
+    - Choose one of the two (mutually exclusive):
+      - Point `pack_ids_class_file_path` to the path where you put the `StringPackIds` file.
+      - Configure `resource_config_setting` to generate the necessary aapt config file.
+        - `config_file_path` file path for aapt2 config to set stable id
+        - `source_file_path` for file path of generated Java source
+        - `string_offset` a hex string for string id offset (usually "0x7f120000")
+        - `plurals_offset` a hex string for plural id offset (usually "0x7f100000")
+        - `package_name` for package name.
 4. Make following changes to your Android project's `build.gradle`.
    ```
    allprojects {

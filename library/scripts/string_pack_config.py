@@ -82,6 +82,7 @@ class StringPackConfig:
         "languages_to_drop",
         "assets_directory",
         "pack_ids_class_file_path",
+        "resource_config_setting",
         "pack_id_mapping",
         "pack_scripts_directory",
     ]
@@ -114,8 +115,20 @@ class StringPackConfig:
         # The assets directory where to save the generated string pack files.
         self.assets_directory = None
 
-        # File path to the class where stores the map from android string key to pack id.
+        # File path to the class where stores the map from android string key to pack id. Not compatible with `resource_config_setting`.
         self.pack_ids_class_file_path = None
+
+        # Settings dict for aapt2 config that overrides the android string id. Not compatible with `pack_ids_class_file_path`.
+        # All properties below are mandatory entries in the dict.
+        # - `config_file_path` file path for aapt2 config to set stable id
+        # - `source_file_path` for file path of generated Java source
+        # - `string_offset` a hex string for string id offset (usually "0x7f120000")
+        # - `plurals_offset` a hex string for plural id offset (usually "0x7f100000")
+        # - `package_name` for package name.
+        #
+        # Change the apk build script to ensure this takes effect in build process.
+        #     android.androidResources.additionalParameters "--stable-ids", config_file_path
+        self.resource_config_setting = None
 
         # A dictionary that maps a specific language to its pack ID. The default pack ID is the language code, but the
         # app may decide to pack similar languages to one pack file.

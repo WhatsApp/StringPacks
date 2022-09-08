@@ -12,7 +12,7 @@ import math
 import re
 import subprocess
 from os import path
-from typing import Set
+from typing import Dict, List, Set, Tuple
 from xml.etree import ElementTree
 
 import string_pack_config
@@ -93,14 +93,103 @@ def find_strings_used_in_xml(filename, safe_widgets):
 NAME_CATCHER_RE = re.compile('<(string|plurals) name="([^"]+)"')
 
 
-def output_string_ids_map(sp_config, strings_to_move):
+def output_string_ids_setting(sp_config, strings_to_move: Set):
+    class_file_path = sp_config.pack_ids_class_file_path
+    resource_config_setting = sp_config.resource_config_setting
+    sorted_strings_to_move = sorted(strings_to_move)
+    if class_file_path is None and resource_config_setting is None:
+        print(
+            "Invalid config. Either class_file_path or resource_config_path needs to be set"
+        )
+        return
+    if class_file_path is not None:
+        output_string_ids_map(class_file_path, sorted_strings_to_move)
+    else:
+        output_string_ids_config(resource_config_setting, sorted_strings_to_move)
+
+
+def _generate_java_source_line(content: str, value: int):
+    return content + hex(value) + ";\n"
+
+
+def output_string_ids_config(
+    resource_config_setting: Dict, sorted_strings_to_move: List[Tuple]
+):
+    output_config_file = resource_config_setting["config_file_path"]
+    output_source_file = resource_config_setting["source_file_path"]
+    resource_id_offset = {
+        "string": int(resource_config_setting["string_offset"], 16),
+        "plurals": int(resource_config_setting["plurals_offset"], 16),
+    }
+    package_name = resource_config_setting["package_name"]
+
     string_pack_ids = []
-    for index, string_tuple in enumerate(sorted(strings_to_move)):
+    index = {"string": 0, "plurals": 0}
+    for string_tuple in sorted_strings_to_move:
+        string_type, string_name = string_tuple
+        string_id = hex(resource_id_offset[string_type] + index[string_type])
+        string_pack_ids.append(
+            f"{package_name}:{string_type}/{string_name} = {string_id}"
+        )
+        index[string_type] = index[string_type] + 1
+    if not path.exists(output_source_file):
+        # No class file is provided, print to console directly to let people copy/paste later.
+        for pack_id in string_pack_ids:
+            print(pack_id)
+        return
+    with open(output_config_file, "wt") as pack_ids_file:
+        pack_ids_file.writelines("\n".join(string_pack_ids))
+    assert output_source_file.endswith(".java"), "We only support Java for now."
+    with open(output_source_file, "rt") as pack_file:
+        source_file_lines = pack_file.readlines()
+
+    region_start_index = None
+    region_end_index = None
+    for i, line in enumerate(source_file_lines):
+        if "// region StringPacks ID range" in line:
+            region_start_index = i
+        elif "// endregion" in line:
+            region_end_index = i
+
+    if region_start_index is None or region_end_index is None:
+        print(
+            f"Can't find the String Pack IDs map region in {output_source_file} to update content."
+        )
+        return
+
+    STRING_BEGIN = "private static final int STRING_BEGIN = "
+    STRING_END = "private static final int STRING_END = "
+    PLURALS_BEGIN = "private static final int PLURALS_BEGIN = "
+    PLURALS_END = "private static final int PLURALS_END = "
+    leading_space_num = source_file_lines[region_start_index].index("//")
+    leading_space = " " * leading_space_num
+    output_source_file_lines = source_file_lines[0 : region_start_index + 1]
+    output_source_file_lines += _generate_java_source_line(
+        leading_space + STRING_BEGIN, resource_id_offset["string"]
+    )
+    output_source_file_lines += _generate_java_source_line(
+        leading_space + STRING_END, resource_id_offset["string"] + index["string"] - 1
+    )
+    output_source_file_lines += _generate_java_source_line(
+        leading_space + PLURALS_BEGIN, resource_id_offset["plurals"]
+    )
+    output_source_file_lines += _generate_java_source_line(
+        leading_space + PLURALS_END,
+        resource_id_offset["plurals"] + index["plurals"] - 1,
+    )
+    output_source_file_lines += source_file_lines[region_end_index:]
+
+    with open(output_source_file, "wt") as pack_file:
+        pack_file.writelines("".join(output_source_file_lines))
+
+
+def output_string_ids_map(class_file_path: str, sorted_strings_to_move: List[Tuple]):
+    string_pack_ids = []
+    for string_tuple in sorted_strings_to_move:
         string_type, string_name = string_tuple
         string_pack_ids.append((" " * 10 + "R.%s.%s,") % (string_type, string_name))
 
-    class_file_path = sp_config.pack_ids_class_file_path
-    if class_file_path is None or not path.exists(class_file_path):
+    if not path.exists(class_file_path):
         # No class file is provided, print to console directly to let people copy/paste later.
         for pack_id in string_pack_ids:
             print(pack_id)
@@ -270,7 +359,7 @@ def find_movable_strings(sp_config, print_reverse=False):
 
     # Don't output IDs if we are interested in the unmovable strings.
     if not print_reverse:
-        output_string_ids_map(sp_config, strings_to_move)
+        output_string_ids_setting(sp_config, strings_to_move)
 
 
 def main():

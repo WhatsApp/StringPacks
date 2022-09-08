@@ -17,13 +17,26 @@ import string_pack
 import string_pack_config
 from string_pack_config import LanguageHandlingCase
 
+
 class IdFinder(object):
     def __init__(self, sp_config):
-        with open(sp_config.pack_ids_class_file_path, "rt") as fd:
-            self.id_data = fd.read()
-        all_matches = re.findall(
-            r"R\.(?:string|plurals)(?:.*?)\.(\w+),", self.id_data, flags=re.DOTALL
-        )
+        if sp_config.pack_ids_class_file_path is not None:
+            with open(sp_config.pack_ids_class_file_path, "rt") as fd:
+                id_data = fd.read()
+            all_matches = re.findall(
+                r"R\.(?:string|plurals)(?:.*?)\.(\w+),", id_data, flags=re.DOTALL
+            )
+        else:
+            all_matches = []
+            if os.path.exists(sp_config.resource_config_setting["config_file_path"]):
+                with open(
+                    sp_config.resource_config_setting["config_file_path"], "rt"
+                ) as fd:
+                    id_data = fd.read()
+                all_matches = re.findall(
+                    r"\:(?:string|plurals)\/(\w+) =", id_data, flags=re.DOTALL
+                )
+
         self.seen_ids = {}
         for i in range(0, len(all_matches)):
             self.seen_ids[all_matches[i]] = i
