@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import sys
+from typing import Set
 from xml.etree import ElementTree
 
 
@@ -33,7 +34,7 @@ def extract_locale_from_file_name(file_name):
     return normalize_locale(match.group(1))
 
 
-def unescape(text):
+def unescape(text) -> str:
     if not text:
         return ""
     if len(text) >= 2 and text.startswith('"') and text.endswith('"'):
@@ -55,7 +56,9 @@ class TreeBuilderWithComments(ElementTree.TreeBuilder):
         self.end(self.COMMENT_TAG)
 
 
-def read_string_dict(locale, file_name, id_finder, plural_handler):
+def read_string_dict(
+    locale, file_name, id_finder, plural_handler, nullify_res_ids: Set = set()
+):
     result_dict = {}
     try:
         root = ElementTree.parse(
@@ -82,14 +85,17 @@ def read_string_dict(locale, file_name, id_finder, plural_handler):
             # but still remains in the translations (such strings will be cleaned up next time
             # move_strings_for_packing.py is run). Log a warning and skip the string.
             sys.stderr.write(
-                "No ID found for '%s' while packing %s\n" % (string_name, file_name)
+                f"No ID found for '{string_name}' while packing {file_name}\n"
             )
             continue
         if element.tag == "string":
-            text = element.text
-            result_dict[id] = unescape(text)
+            if f"R.string.{string_name}" in nullify_res_ids:
+                continue
+            result_dict[id] = unescape(element.text)
         else:  # plurals
             plural_dict = {}
+            if f"R.plurals.{string_name}" in nullify_res_ids:
+                continue
             for item in element:
                 assert item.tag == "item"
                 quantity = item.attrib["quantity"]
@@ -102,7 +108,7 @@ def read_string_dict(locale, file_name, id_finder, plural_handler):
 
 
 def blob_append_32_bit(blob, integer):
-    assert 0 <= integer < 2 ** 31
+    assert 0 <= integer < 2**31
     blob.append(integer & 0xFF)
     blob.append((integer & 0xFF00) >> 8)
     blob.append((integer & 0xFF0000) >> 16)
@@ -110,7 +116,7 @@ def blob_append_32_bit(blob, integer):
 
 
 def blob_append_16_bit(blob, integer):
-    assert 0 <= integer < 2 ** 15
+    assert 0 <= integer < 2**15
     blob.append(integer & 0xFF)
     blob.append((integer & 0xFF00) >> 8)
 

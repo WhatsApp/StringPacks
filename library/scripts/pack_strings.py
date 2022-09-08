@@ -12,6 +12,7 @@ import logging
 import multiprocessing
 import os
 import re
+from typing import Optional
 
 import string_pack
 import string_pack_config
@@ -41,10 +42,8 @@ class IdFinder(object):
         for i in range(0, len(all_matches)):
             self.seen_ids[all_matches[i]] = i
 
-    def get_id(self, resource_name):
-        if resource_name in self.seen_ids:
-            return self.seen_ids[resource_name]
-        return None
+    def get_id(self, resource_name: str) -> Optional[int]:
+        return self.seen_ids.get(resource_name)
 
 
 def group_string_files_by_languages(sp_config, packable_strings_file_paths):
@@ -65,9 +64,7 @@ def group_string_files_by_languages(sp_config, packable_strings_file_paths):
 
 def get_dest_pack_file_path(sp_config, pack_id):
     prefix = "" if sp_config.module is None else (sp_config.module + "_")
-    return os.path.join(
-        sp_config.assets_directory, "%sstrings_%s.pack" % (prefix, pack_id)
-    )
+    return os.path.join(sp_config.assets_directory, f"{prefix}strings_{pack_id}.pack")
 
 
 def pack_strings(sp_config, plural_handler):
