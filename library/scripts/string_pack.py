@@ -312,7 +312,7 @@ class TranslationDict(object):
     def __init__(self):
         self.store = collections.defaultdict(dict)
 
-    def add_for_locale(self, locale, string_dict):
+    def add_for_locale(self, locale, string_dict: Dict):
         locale_dict = self.store[locale]
         for key, value in string_dict.items():
             # TODO: Uncomment this once the Warning is fixed. Commenting it temporarily as
@@ -328,6 +328,13 @@ class TranslationDict(object):
     def add_translation(self, translation_dict: Dict):
         for locale, dictionary in translation_dict.items():
             self.add_for_locale(locale, dictionary)
+
+    def remove_unused_translation(self, id_finder: "IdFinder", unused_strings: List):
+        for locale_dict in self.store.values():
+            for unused_string in unused_strings:
+                id = id_finder.get_id(unused_string)
+                if id is not None and id in locale_dict:
+                    del locale_dict[id]
 
 
 class StringPack(object):

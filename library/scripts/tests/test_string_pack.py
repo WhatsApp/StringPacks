@@ -76,6 +76,15 @@ class TestStringPackMethods(unittest.TestCase):
         },
     }
 
+    EXPECTED_TRANSLATION = {
+        "en-US": {
+            10: "first color",
+        },
+        "en-GB": {
+            4: "first diet",
+        },
+    }
+
     def test_UTF_8(self):
         self._test_unpacking("UTF-8")
 
@@ -107,3 +116,22 @@ class TestStringPackMethods(unittest.TestCase):
                     string_pack.StringPack.from_file(filename), self.TEST_TRANSLATION
                 )
             )
+
+    def test_repacking_no_removal(self):
+        translation = string_pack.TranslationDict()
+        translation.add_translation(self.TEST_TRANSLATION)
+        translation.remove_unused_translation(FakeIdFinder(), [])
+        self.assertTrue(_compare_dict_deep(translation.store, self.TEST_TRANSLATION))
+
+    def test_repacking_removal(self):
+        translation = string_pack.TranslationDict()
+        translation.add_translation(self.TEST_TRANSLATION)
+        translation.remove_unused_translation(
+            FakeIdFinder(), ["first_plurals", "first_string", "second_string"]
+        )
+        self.assertTrue(
+            _compare_dict_deep(
+                translation.store,
+                self.EXPECTED_TRANSLATION,
+            )
+        )
