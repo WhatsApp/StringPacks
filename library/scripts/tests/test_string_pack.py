@@ -83,13 +83,25 @@ class TestStringPackMethods(unittest.TestCase):
         self._test_unpacking("UTF-16BE")
 
     def _test_unpacking(self, encoding):
-        full_store = string_pack.StringPack(encoding=encoding)
-        for locale, dictionary in self.TEST_TRANSLATION.items():
-            full_store.add_for_locale(locale, dictionary)
+        translation = string_pack.TranslationDict()
+        translation.add_translation(self.TEST_TRANSLATION)
+        full_store = string_pack.StringPack(encoding=encoding, translation=translation)
         full_store.compile()
         with tempfile.NamedTemporaryFile(suffix=".pack") as pack:
             filename = pack.name
             full_store.write_to_file(filename)
+            self.assertTrue(
+                _compare_dict_deep(
+                    string_pack.StringPack.from_file(filename), self.TEST_TRANSLATION
+                )
+            )
+
+    def test_build_with_dict(self):
+        translation = string_pack.TranslationDict()
+        translation.add_translation(self.TEST_TRANSLATION)
+        with tempfile.NamedTemporaryFile(suffix=".pack") as pack:
+            filename = pack.name
+            string_pack.build_with_dict(pack.name, translation)
             self.assertTrue(
                 _compare_dict_deep(
                     string_pack.StringPack.from_file(filename), self.TEST_TRANSLATION

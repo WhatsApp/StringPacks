@@ -308,12 +308,8 @@ def _map_translations(
     return result
 
 
-class StringPack(object):
-    "The full string pack, with information about locales, ids, plurals, etc"
-
-    def __init__(self, encoding):
-        assert encoding in _ENCODING_ID
-        self.encoding = encoding
+class TranslationDict(object):
+    def __init__(self):
         self.store = collections.defaultdict(dict)
 
     def add_for_locale(self, locale, string_dict):
@@ -328,6 +324,19 @@ class StringPack(object):
             #        )
             #    )
             locale_dict[key] = value
+
+    def add_translation(self, translation_dict: Dict):
+        for locale, dictionary in translation_dict.items():
+            self.add_for_locale(locale, dictionary)
+
+
+class StringPack(object):
+    "The full string pack, with information about locales, ids, plurals, etc"
+
+    def __init__(self, encoding: str, translation: TranslationDict):
+        assert encoding in _ENCODING_ID
+        self.encoding = encoding
+        self.store = translation.store
 
     @staticmethod
     def from_file(file_name: str) -> Dict:
@@ -405,23 +414,28 @@ class StringPack(object):
             pack_file.write(self.string_buffer.store)
 
 
-def build(
-    input_file_names: List, output_file_name: str, id_finder: "IdFinder", plural_handler
-):
+def build_with_dict(output_file_name: str, translation_dict: TranslationDict) -> None:
     """Builds the string pack and writes it to a file.
 
     It tries both UTF-8 and UTF-16 to see which one is smaller, and then writes
     the string pack in that encoding."""
     packs = []
     for encoding in _ENCODING_ID.keys():
-        full_store = StringPack(encoding=encoding)
-        for input_file_name in input_file_names:
-            locale = extract_locale_from_file_name(input_file_name)
-            full_store.add_for_locale(
-                locale,
-                read_string_dict(locale, input_file_name, id_finder, plural_handler),
-            )
+        full_store = StringPack(encoding=encoding, translation=translation_dict)
         full_store.compile()
         packs.append(full_store)
     smallest_pack = min(packs, key=lambda p: p.string_buffer_size())
     smallest_pack.write_to_file(output_file_name)
+
+
+def build(
+    input_file_names: List, output_file_name: str, id_finder: "IdFinder", plural_handler
+):
+    translation_dict = TranslationDict()
+    for input_file_name in input_file_names:
+        locale = extract_locale_from_file_name(input_file_name)
+        translation_dict.add_for_locale(
+            locale,
+            read_string_dict(locale, input_file_name, id_finder, plural_handler),
+        )
+    build_with_dict(output_file_name, translation_dict)
