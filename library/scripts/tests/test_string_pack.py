@@ -110,7 +110,7 @@ class TestStringPackMethods(unittest.TestCase):
         translation.add_translation(self.TEST_TRANSLATION)
         with tempfile.NamedTemporaryFile(suffix=".pack") as pack:
             filename = pack.name
-            string_pack.build_with_dict(pack.name, translation)
+            string_pack.build_with_dict(filename, translation)
             self.assertTrue(
                 _compare_dict_deep(
                     string_pack.StringPack.from_file(filename), self.TEST_TRANSLATION
@@ -135,3 +135,31 @@ class TestStringPackMethods(unittest.TestCase):
                 self.EXPECTED_TRANSLATION,
             )
         )
+
+    def test_parse_nullified_resource_file(self):
+        self.assertListEqual(
+            ["people", "yes", "irrelevant"],
+            string_pack.get_unused_resource(
+                test_util.get_res_path("unused_resource.txt"),
+            ),
+        )
+
+    def test_repack_integration(self):
+        translation = string_pack.TranslationDict()
+        translation.add_translation(self.TEST_TRANSLATION)
+        with tempfile.NamedTemporaryFile(
+            suffix=".pack"
+        ) as input_pack, tempfile.NamedTemporaryFile(suffix=".pack") as output_pack:
+            string_pack.build_with_dict(input_pack.name, translation)
+            string_pack.repack(
+                test_util.get_res_path("expected_resources.txt"),
+                input_pack.name,
+                test_util.get_res_path("unused_resource.txt"),
+                output_pack.name,
+            )
+            self.assertTrue(
+                _compare_dict_deep(
+                    string_pack.StringPack.from_file(output_pack.name),
+                    self.EXPECTED_TRANSLATION,
+                )
+            )

@@ -3,6 +3,7 @@
 # This source code is licensed under the Apache 2.0 license found in
 # the LICENSE file in the root directory of this source tree.
 
+import argparse
 import collections
 import logging
 import os
@@ -447,3 +448,51 @@ def build(
             read_string_dict(locale, input_file_name, id_finder, plural_handler),
         )
     build_with_dict(output_file_name, translation_dict)
+
+
+def get_unused_resource(nullified_resource: str) -> List[str]:
+    with open(nullified_resource, "r") as file:
+        lines = file.read().splitlines()
+        return [line[line.rfind(".") + 1 :] for line in lines]
+
+
+def repack(
+    resource_config: str, original_pack: str, nullified_resource: str, output: str
+) -> None:
+    translation = TranslationDict()
+    input_dict = StringPack.from_file(original_pack)
+    translation.add_translation(input_dict)
+    id_finder = IdFinder.from_resource_config(resource_config)
+    unused_resource = get_unused_resource(nullified_resource)
+    translation.remove_unused_translation(id_finder, unused_resource)
+    build_with_dict(output, translation)
+
+
+def main():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        "--resource-config",
+        help="Location of Android resource config file mapping used by --stable-ids.",
+    )
+    arg_parser.add_argument(
+        "--original-pack",
+        help="Location of original string pack files to be optimized.",
+    )
+    arg_parser.add_argument(
+        "--nullified-resource", help="Location of unused Android resource ids."
+    )
+    arg_parser.add_argument(
+        "--output-file", help="Location of output trimmed string pack file."
+    )
+
+    args = arg_parser.parse_args()
+    repack(
+        args.resource_config,
+        args.original_pack,
+        args.nullified_resource,
+        args.output_file,
+    )
+
+
+if __name__ == "__main__":
+    main()
