@@ -7,6 +7,8 @@ import unittest
 
 import pack_strings
 import string_pack_config
+from pack_strings import IdFinder
+from tests import test_util
 
 
 class TestPackStringsMethods(unittest.TestCase):
@@ -24,7 +26,7 @@ class TestPackStringsMethods(unittest.TestCase):
                 "sp/app_src_main_res/values-sk/strings.xml",
                 "sp/coreui_src_main_res/values-cs/strings.xml",
                 "sp/coreui_src_main_res/values-sk/strings.xml",
-            ]
+            ],
         )
 
         self.assertEqual(2, len(grouped_file_paths))
@@ -111,7 +113,7 @@ class TestPackStringsMethods(unittest.TestCase):
                 "sp/app_src_main_res/values-sk/strings.xml",
                 "sp/coreui_src_main_res/values-cs/strings.xml",
                 "sp/coreui_src_main_res/values-sk/strings.xml",
-            ]
+            ],
         )
 
         self.assertEqual(1, len(grouped_file_paths))
@@ -133,11 +135,10 @@ class TestPackStringsMethods(unittest.TestCase):
                 "sp/app_src_main_res/values-sk/strings.xml",
                 "sp/coreui_src_main_res/values-cs/strings.xml",
                 "sp/coreui_src_main_res/values-sk/strings.xml",
-            ]
+            ],
         )
 
         self.assertEqual(0, len(grouped_file_paths))
-
 
     def test_get_dest_pack_file_path_with_module(self):
         self.sp_config.module = "module"
@@ -147,3 +148,20 @@ class TestPackStringsMethods(unittest.TestCase):
     def test_get_dest_pack_file_path_without_module(self):
         pack_file_pack = pack_strings.get_dest_pack_file_path(self.sp_config, "ca")
         self.assertEqual("app/src/main/assets/strings_ca.pack", pack_file_pack)
+
+    EXPECTED_DICT = {
+        "people": 0,
+        "no": 1,
+        "yes": 2,
+    }
+
+    def test_get_parse_id_from_resource_config(self):
+        config_path = test_util.get_res_path("expected_resources.txt")
+        id_finder = IdFinder.from_resource_config(config_path)
+        self.assertDictEqual(id_finder.seen_ids, self.EXPECTED_DICT)
+
+    def test_get_parse_id_from_stringpack_config(self):
+        config_path = test_util.get_res_path("expected_resources.txt")
+        self.sp_config.resource_config_setting = {"config_file_path": config_path}
+        id_finder = IdFinder.from_stringpack_config(self.sp_config)
+        self.assertDictEqual(id_finder.seen_ids, self.EXPECTED_DICT)

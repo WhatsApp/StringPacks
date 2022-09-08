@@ -8,7 +8,7 @@ import logging
 import os
 import re
 import sys
-from typing import Set
+from typing import Dict, List, Set
 from xml.etree import ElementTree
 
 
@@ -405,7 +405,9 @@ class StringPack(object):
             pack_file.write(self.string_buffer.store)
 
 
-def build(input_file_names, output_file_name, id_finder, plural_handler):
+def build(
+    input_file_names: List, output_file_name: str, id_finder: "IdFinder", plural_handler
+):
     """Builds the string pack and writes it to a file.
 
     It tries both UTF-8 and UTF-16 to see which one is smaller, and then writes

@@ -10,7 +10,7 @@ import os
 
 def load_config(
     config_json_dict=None, config_json_file_path=None, skip_default_config=False
-):
+) -> "StringPackConfig":
     if (
         config_json_dict is None
         and config_json_file_path is None

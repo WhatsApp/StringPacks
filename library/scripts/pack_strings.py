@@ -12,41 +12,53 @@ import logging
 import multiprocessing
 import os
 import re
-from typing import Optional
+from typing import List, Optional
 
 import string_pack
 import string_pack_config
-from string_pack_config import LanguageHandlingCase
+from string_pack_config import LanguageHandlingCase, StringPackConfig
 
 
 class IdFinder(object):
-    def __init__(self, sp_config):
+    def __init__(self, all_matches: List):
+        self.seen_ids = {}
+        for i in range(len(all_matches)):
+            self.seen_ids[all_matches[i]] = i
+
+    @classmethod
+    def from_resource_config(cls, config_file_path: str) -> "IdFinder":
+        assert os.path.exists(
+            config_file_path
+        ), f"Config file {config_file_path} does not exist"
+        all_matches = []
+        with open(config_file_path, "rt") as fd:
+            id_data = fd.read()
+            all_matches = re.findall(
+                r"\:(?:string|plurals)\/(\w+) =", id_data, flags=re.DOTALL
+            )
+        return cls(all_matches)
+
+    @classmethod
+    def from_stringpack_config(cls, sp_config: StringPackConfig) -> "IdFinder":
         if sp_config.pack_ids_class_file_path is not None:
             with open(sp_config.pack_ids_class_file_path, "rt") as fd:
                 id_data = fd.read()
             all_matches = re.findall(
                 r"R\.(?:string|plurals)(?:.*?)\.(\w+),", id_data, flags=re.DOTALL
             )
+            return cls(all_matches)
         else:
-            all_matches = []
-            if os.path.exists(sp_config.resource_config_setting["config_file_path"]):
-                with open(
-                    sp_config.resource_config_setting["config_file_path"], "rt"
-                ) as fd:
-                    id_data = fd.read()
-                all_matches = re.findall(
-                    r"\:(?:string|plurals)\/(\w+) =", id_data, flags=re.DOTALL
-                )
-
-        self.seen_ids = {}
-        for i in range(0, len(all_matches)):
-            self.seen_ids[all_matches[i]] = i
+            return cls.from_resource_config(
+                sp_config.resource_config_setting["config_file_path"]
+            )
 
     def get_id(self, resource_name: str) -> Optional[int]:
         return self.seen_ids.get(resource_name)
 
 
-def group_string_files_by_languages(sp_config, packable_strings_file_paths):
+def group_string_files_by_languages(
+    sp_config: StringPackConfig, packable_strings_file_paths
+):
 
     # A map from language (aka, pack ID) to list of string resource files.
     grouped_files = collections.defaultdict(list)
@@ -62,13 +74,13 @@ def group_string_files_by_languages(sp_config, packable_strings_file_paths):
     return grouped_files
 
 
-def get_dest_pack_file_path(sp_config, pack_id):
+def get_dest_pack_file_path(sp_config: StringPackConfig, pack_id):
     prefix = "" if sp_config.module is None else (sp_config.module + "_")
     return os.path.join(sp_config.assets_directory, f"{prefix}strings_{pack_id}.pack")
 
 
-def pack_strings(sp_config, plural_handler):
-    id_finder = IdFinder(sp_config)
+def pack_strings(sp_config: StringPackConfig, plural_handler):
+    id_finder = IdFinder.from_stringpack_config(sp_config)
     packable_strings_file_paths = set()
 
     moved = []
@@ -94,7 +106,11 @@ def pack_strings(sp_config, plural_handler):
 
 class PackBuilder(object):
     def __init__(
-        self, sp_config, grouped_strings_file_paths, id_finder, plural_handler
+        self,
+        sp_config: StringPackConfig,
+        grouped_strings_file_paths,
+        id_finder,
+        plural_handler,
     ):
         self.sp_config = sp_config
         self.grouped_strings_file_paths = grouped_strings_file_paths
