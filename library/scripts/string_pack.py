@@ -218,6 +218,8 @@ class LocaleStore(object):
 
 # Keep in sync with `ENCODINGS` in ParsedStringPack.java
 _ENCODING_ID = {"UTF-8": 0, "UTF-16BE": 1}
+# Keep in sync with `_ENCODING_ID`
+_ENCODING_INDEX = {0: "UTF-8", 1: "UTF-16BE"}
 
 # 2 bytes for number of locales, 4 bytes for starting index of locale data, 1 byte for the encoding
 # of string data, and 4 bytes for starting index of the string data. Totalling 11 bytes.
@@ -227,6 +229,83 @@ _HEADER_SIZE = 11
 # (see blob_append_locale), and 4 bytes for a pointer to where its table starts in
 # file.
 _LOCALE_HEADER_SIZE = 11
+
+
+def _read(content: bytearray, offset: int, length: int = 1) -> int:
+    return int.from_bytes(content[offset : offset + length], "little")
+
+
+def _read_locale_from(content: bytearray, offset: int) -> str:
+    if _read(content, offset + 2) == 0:
+        length = 2
+    elif _read(content, offset + 5) == 0:
+        length = 5
+    else:
+        length = 7
+    return content[offset : offset + length].decode("ascii")
+
+
+def _loadString(
+    content: bytearray, mapped_id: int, startOfStringData: int, encoding: str
+) -> str:
+    caret = mapped_id
+    stringStart = _read(content, caret, 4)
+    caret += 4  # Increment to 4 Bytes which we read above for string starting location
+    stringLen = _read(content, caret, 2)
+    offset = startOfStringData + stringStart
+    return content[offset : offset + stringLen].decode(encoding)
+
+
+def _loadPlural(
+    content: bytearray, mapped_id: int, startOfStringData: int, encoding: str
+) -> Dict:
+    caret = mapped_id
+    quantityCount = _read(content, caret)
+    caret += 1  # Increment by a single byte which are for quantity count
+    pluralMap = {}
+    for _ in range(quantityCount):
+        quantityId = _read(content, caret)
+        caret += 1  # Increment by a single byte which are for quantity id
+        stringStart = _read(content, caret, 4)
+        caret += (
+            4  # Increment to 4*8 Bits which we read above for plural starting location
+        )
+        stringLen = _read(content, caret, 2)
+        caret += 2  # Increment to 2*8 Bits which we read above for plural length
+        offset = startOfStringData + stringStart
+        pluralMap[quantityId] = content[offset : offset + stringLen].decode(encoding)
+    return pluralMap
+
+
+def _map_translations(
+    content: bytearray, startOfLocaleData: int, headerStart: int
+) -> Dict:
+    caret = startOfLocaleData + headerStart
+    numStrings = _read(content, caret, 2)
+    caret += 2
+    numPlurals = _read(content, caret, 2)
+    caret += 2
+    result = {"string": {}, "plurals": {}}
+    for _ in range(numStrings):
+        id = _read(content, caret, 2)
+        caret += 2
+        result["string"][id] = caret
+        # Increment by 6 Bytes which is string starting location (4) + string length (2)
+        # to be read later when string is fetched
+        caret += 6
+
+    for _ in range(numPlurals):
+        id = _read(content, caret, 2)
+        caret += 2
+        result["plurals"][id] = caret
+        quantityCount = _read(content, caret)
+        caret += 1  # Increment by a single byte which are for quantity count read above
+        for __ in range(quantityCount):
+            # Increment by 7 Bytes which is the
+            # quantity id (1) + string starting location (4) + string length (2) to be
+            # read later when plural is fetched
+            caret += 7
+    return result
 
 
 class StringPack(object):
@@ -249,6 +328,41 @@ class StringPack(object):
             #        )
             #    )
             locale_dict[key] = value
+
+    @staticmethod
+    def from_file(file_name: str) -> Dict:
+        with open(file_name, mode="rb") as file:  # b is important -> binary
+            content = file.read()
+        numLocales = _read(content, 0, 2)
+        startOfLocaleData = _read(content, 2, 4)
+        encodingId = _read(content, 6)
+        assert encodingId in _ENCODING_INDEX.keys(), "Unrecognized encoding"
+        encoding = _ENCODING_INDEX[encodingId]
+        startOfStringData = _read(content, 7, 4)
+
+        caret = _HEADER_SIZE
+        locale_starts = {}
+        for _ in range(numLocales):
+            resourceLocale = _read_locale_from(content, caret)
+            locale_starts[resourceLocale] = caret
+            caret += _LOCALE_HEADER_SIZE
+        translation_dict = {}
+        for locale, locale_start in locale_starts.items():
+            locale_dict = {}
+            translation_dict[locale] = locale_dict
+            headerStart = _read(content, locale_start + 7, 4)
+            mapping = _map_translations(content, startOfLocaleData, headerStart)
+            string_mapping = mapping["string"]
+            for android_id, string_pack_id in string_mapping.items():
+                locale_dict[android_id] = _loadString(
+                    content, string_pack_id, startOfStringData, encoding
+                )
+            plural_mapping = mapping["plurals"]
+            for android_id, string_pack_id in plural_mapping.items():
+                locale_dict[android_id] = _loadPlural(
+                    content, string_pack_id, startOfStringData, encoding
+                )
+        return translation_dict
 
     def compile(self):
         self.string_buffer = StringBuffer(encoding=self.encoding)
@@ -307,6 +421,5 @@ def build(input_file_names, output_file_name, id_finder, plural_handler):
             )
         full_store.compile()
         packs.append(full_store)
-
     smallest_pack = min(packs, key=lambda p: p.string_buffer_size())
     smallest_pack.write_to_file(output_file_name)

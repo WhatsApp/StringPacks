@@ -4,8 +4,10 @@
 # This source code is licensed under the Apache 2.0 license found in
 # the LICENSE file in the root directory of this source tree.
 
+import json
+import tempfile
 import unittest
-from typing import Optional
+from typing import Dict, Optional
 
 import pack_strings
 import string_pack
@@ -17,6 +19,10 @@ class FakeIdFinder(object):
 
     def get_id(self, resource_name: str) -> Optional[int]:
         return FakeIdFinder.TEST_DATA.get(resource_name)
+
+
+def _compare_dict_deep(d1: Dict, d2: Dict) -> bool:
+    return json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
 
 
 class TestStringPackMethods(unittest.TestCase):
@@ -57,3 +63,35 @@ class TestStringPackMethods(unittest.TestCase):
                 {"R.plurals.first_plurals"},
             ),
         )
+
+    TEST_TRANSLATION = {
+        "en-US": {
+            0: {0: "many colors", 1: "zero color", 2: "one color"},
+            10: "first color",
+        },
+        "en-GB": {
+            0: {0: "many colours", 1: "zero colour", 2: "one colour"},
+            2: "first cheque",
+            4: "first diet",
+        },
+    }
+
+    def test_UTF_8(self):
+        self._test_unpacking("UTF-8")
+
+    def test_UTF_16(self):
+        self._test_unpacking("UTF-16BE")
+
+    def _test_unpacking(self, encoding):
+        full_store = string_pack.StringPack(encoding=encoding)
+        for locale, dictionary in self.TEST_TRANSLATION.items():
+            full_store.add_for_locale(locale, dictionary)
+        full_store.compile()
+        with tempfile.NamedTemporaryFile(suffix=".pack") as pack:
+            filename = pack.name
+            full_store.write_to_file(filename)
+            self.assertTrue(
+                _compare_dict_deep(
+                    string_pack.StringPack.from_file(filename), self.TEST_TRANSLATION
+                )
+            )
