@@ -11,6 +11,7 @@ import sys
 from typing import Dict, List, Set
 from xml.etree import ElementTree
 
+from id_finder import IdFinder
 
 # This must be kept in sync with the `quantityIndex()` method in ParsedStringPack.java
 _IDS_FOR_QUANTITY = {"other": 0, "zero": 1, "one": 2, "two": 3, "few": 4, "many": 5}
@@ -329,7 +330,7 @@ class TranslationDict(object):
         for locale, dictionary in translation_dict.items():
             self.add_for_locale(locale, dictionary)
 
-    def remove_unused_translation(self, id_finder: "IdFinder", unused_strings: List):
+    def remove_unused_translation(self, id_finder: IdFinder, unused_strings: List):
         for locale_dict in self.store.values():
             for unused_string in unused_strings:
                 id = id_finder.get_id(unused_string)
@@ -436,7 +437,7 @@ def build_with_dict(output_file_name: str, translation_dict: TranslationDict) ->
 
 
 def build(
-    input_file_names: List, output_file_name: str, id_finder: "IdFinder", plural_handler
+    input_file_names: List, output_file_name: str, id_finder: IdFinder, plural_handler
 ):
     translation_dict = TranslationDict()
     for input_file_name in input_file_names:

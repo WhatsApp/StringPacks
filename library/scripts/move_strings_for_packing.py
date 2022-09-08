@@ -12,6 +12,8 @@ import logging
 import os
 import re
 
+import id_finder
+
 import pack_strings
 import string_pack_config
 from string_pack_config import LanguageHandlingCase
@@ -108,7 +110,7 @@ CLEAR_COLOR = "\033[0m"
 
 
 def move_all_strings(sp_config, keep_dest):
-    id_finder = pack_strings.IdFinder.from_stringpack_config(sp_config)
+    id_finder = id_finder.IdFinder.from_stringpack_config(sp_config)
     for resources_directory in sp_config.original_resources_directories:
         path_pattern = os.path.join(
             resources_directory, "res", "values-*", "strings.xml"
