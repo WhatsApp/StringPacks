@@ -332,11 +332,15 @@ class TranslationDict(object):
             self.add_for_locale(locale, dictionary)
 
     def remove_unused_translation(self, id_finder: IdFinder, unused_strings: List):
-        for locale_dict in self.store.values():
+        store = self.store
+        for locale_dict in store.values():
             for unused_string in unused_strings:
                 id = id_finder.get_id(unused_string)
                 if id is not None and id in locale_dict:
                     del locale_dict[id]
+        for locale in list(store.keys()):
+            if len(store[locale]) == 0:
+                del store[locale]
 
 
 class StringPack(object):

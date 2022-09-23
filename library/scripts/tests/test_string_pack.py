@@ -136,6 +136,19 @@ class TestStringPackMethods(unittest.TestCase):
             )
         )
 
+    def test_repacking_removal_empty_locale(self):
+        translation = string_pack.TranslationDict()
+        translation.add_translation({"en": {0: {}, 1: ""}})
+        translation.remove_unused_translation(
+            FakeIdFinder(), ["first_plurals", "first_string", "second_string"]
+        )
+        self.assertTrue(
+            _compare_dict_deep(
+                translation.store,
+                {},
+            )
+        )
+
     def test_parse_nullified_resource_file(self):
         self.assertListEqual(
             ["people", "yes", "irrelevant"],
