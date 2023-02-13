@@ -9,11 +9,9 @@ package com.whatsapp.stringpacks;
 import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.PluralsRes;
 import java.nio.MappedByteBuffer;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.IntSupplier;
 
 public class ParsedStringPack {
 
@@ -56,7 +54,7 @@ public class ParsedStringPack {
   }
 
   // This must be kept in sync with the `_IDS_FOR_QUANTITY` dictionary in string_pack.py
-  private static int quantityIndex(@PluralRules.Quantity int quantity) {
+  private static int quantityIndex(int quantity) {
     switch (quantity) {
       case PluralRules.QUANTITY_ZERO:
         return 1;
@@ -74,7 +72,7 @@ public class ParsedStringPack {
   }
 
   @Nullable
-  public String getQuantityString(@PluralsRes int id, @NonNull IntSupplier pluralRule){
+  public String getQuantityString(int id, Object quantity, @NonNull PluralRules pluralRules) {
     String[] plural = plurals.get(id);
     if (plural == null) {
       // Plural set not loaded or doesn't exist.
@@ -91,7 +89,8 @@ public class ParsedStringPack {
       // It doesn't exist.
       return null;
     }
-    final int index = quantityIndex(pluralRule.getAsInt());
+    // TODO: pluralRules only accept Strings or Longs, we need to convert `quantity` type if needed.
+    final int index = quantityIndex(pluralRules.quantityForNumber(quantity));
     String result = plural[index];
     if (result != null) {
       return result;

@@ -145,7 +145,8 @@ public class StringPacks {
     synchronized (stringPackLock) {
       if (parsedStringPack != null) {
         if (isPlural) {
-          translation = parsedStringPack.getQuantityString(location, () -> pluralRules.quantityForNumber(quantity));
+          // TODO better fix for the int / long interfaces.
+          translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules);
         } else {
           translation = parsedStringPack.getString(location);
         }

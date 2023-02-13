@@ -92,6 +92,17 @@ public abstract class PluralRules {
     }
   }
 
+  @Quantity
+  public int quantityForNumber(@NonNull Object number) {
+    if (number instanceof String) {
+      return quantityForNumber((String) number);
+    } else if (number instanceof Long) {
+      return quantityForNumber((long) number);
+    } else {
+      return QUANTITY_OTHER;
+    }
+  }
+
   private static Map<String, PluralRules> allRules = new HashMap<>();
 
   // The following rules are based on CLDR plurals information, specifically
