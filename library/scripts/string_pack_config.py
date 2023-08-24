@@ -6,6 +6,7 @@
 import enum
 import json
 import os
+from importlib import resources
 
 
 def load_config(
@@ -23,10 +24,8 @@ def load_config(
     sp_config = StringPackConfig()
 
     if not skip_default_config:
-        default_config_json_file_path = os.path.join(
-            os.path.dirname(__file__), "default_config.json"
-        )
-        sp_config.load_from_file(default_config_json_file_path)
+        with resources.path("resources", "default_config.json") as path:
+            sp_config.load_from_file(path)
 
     if config_json_file_path is not None:
         sp_config.load_from_file(config_json_file_path)
