@@ -85,10 +85,8 @@ def read_string_dict(
         if id is None:
             # No integer ID was found for the string. The string was most probably removed,
             # but still remains in the translations (such strings will be cleaned up next time
-            # move_strings_for_packing.py is run). Log a warning and skip the string.
-            sys.stderr.write(
-                f"No ID found for '{string_name}' while packing {file_name}\n"
-            )
+            # move_strings_for_packing.py is run).
+            # TODO: T164393760 Handle 'No integer ID was found' cases
             continue
         if element.tag == "string":
             if f"R.string.{string_name}" in nullify_res_ids:
