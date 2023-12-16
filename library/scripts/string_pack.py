@@ -231,6 +231,11 @@ _HEADER_SIZE = 11
 _LOCALE_HEADER_SIZE = 11
 
 
+def _write_to_list(text_to_write: str, output_list: List) -> None:
+    if output_list is not None:
+        output_list.append(text_to_write)
+
+
 def _read(content: bytearray, offset: int, length: int = 1) -> int:
     return int.from_bytes(content[offset : offset + length], "little")
 
@@ -278,32 +283,52 @@ def _loadPlural(
 
 
 def _map_translations(
-    content: bytearray, startOfLocaleData: int, headerStart: int
+    content: bytearray, startOfLocaleData: int, headerStart: int, startOfStringData: int, encoding: str, unpacked_output: List
 ) -> Dict:
     caret = startOfLocaleData + headerStart
     numStrings = _read(content, caret, 2)
+    _write_to_list(f"Num strings (2-bytes): {numStrings}", unpacked_output)
     caret += 2
     numPlurals = _read(content, caret, 2)
+    _write_to_list(f"Num plurals (2-bytes): {numPlurals}", unpacked_output)
     caret += 2
     result = {"string": {}, "plurals": {}}
+    _write_to_list("\n\n", unpacked_output)
+    _write_to_list(">>>>>> String data <<<<<<", unpacked_output)
+    _write_to_list("\n", unpacked_output)
     for _ in range(numStrings):
         id = _read(content, caret, 2)
+        _write_to_list(f"String id (2-bytes): {id}", unpacked_output)
         caret += 2
         result["string"][id] = caret
+        _write_to_list(f"String Starting Index (4-bytes): {_read(content, caret, 4)}", unpacked_output)
+        _write_to_list(f"String Length (2-bytes): {_read(content, caret+4, 2)}", unpacked_output)
+        _write_to_list(f"String: {_loadString(content, caret, startOfStringData, encoding)}", unpacked_output)
+        _write_to_list("\n", unpacked_output)
         # Increment by 6 Bytes which is string starting location (4) + string length (2)
         # to be read later when string is fetched
         caret += 6
 
+    _write_to_list("\n\n", unpacked_output)
+    _write_to_list(">>>>>> Plural data <<<<<<", unpacked_output)
+    _write_to_list("\n", unpacked_output)
     for _ in range(numPlurals):
         id = _read(content, caret, 2)
+        _write_to_list(f"Plural id (2-bytes): {id}", unpacked_output)
         caret += 2
         result["plurals"][id] = caret
         quantityCount = _read(content, caret)
+        _write_to_list(f"Quantity count (1-byte): {quantityCount}", unpacked_output)
         caret += 1  # Increment by a single byte which are for quantity count read above
         for __ in range(quantityCount):
             # Increment by 7 Bytes which is the
             # quantity id (1) + string starting location (4) + string length (2) to be
             # read later when plural is fetched
+            _write_to_list(f"\tQuantity Id (1-byte): {_read(content, caret)}", unpacked_output)
+            _write_to_list(f"\tString Starting Index (4-bytes): {_read(content, caret+1, 4)}", unpacked_output)
+            _write_to_list(f"\tString Length (2-bytes): {_read(content, caret+5, 2)}", unpacked_output)
+            _write_to_list(f"\tString: {_loadString(content, caret+1, startOfStringData, encoding)}", unpacked_output)
+            _write_to_list("\n", unpacked_output)
             caret += 7
     return result
 
@@ -350,28 +375,35 @@ class StringPack(object):
         self.store = translation.store
 
     @staticmethod
-    def from_file(file_name: str) -> Dict:
+    def from_file(file_name: str, unpacked_output: List = None) -> Dict:
         with open(file_name, mode="rb") as file:  # b is important -> binary
             content = file.read()
         numLocales = _read(content, 0, 2)
+        _write_to_list(f"Num Locales (2-bytes): {numLocales}", unpacked_output)
         startOfLocaleData = _read(content, 2, 4)
+        _write_to_list(f"Starting Index of Locale Data (4-bytes): {startOfLocaleData}", unpacked_output)
         encodingId = _read(content, 6)
         assert encodingId in _ENCODING_INDEX.keys(), "Unrecognized encoding"
         encoding = _ENCODING_INDEX[encodingId]
+        _write_to_list(f"Encoding (1-byte): {encoding}", unpacked_output)
         startOfStringData = _read(content, 7, 4)
+        _write_to_list(f"Starting Index of string data (4-bytes): {startOfStringData}", unpacked_output)
 
         caret = _HEADER_SIZE
         locale_starts = {}
         for _ in range(numLocales):
             resourceLocale = _read_locale_from(content, caret)
+            _write_to_list(f"Locale (7-bytes): {resourceLocale}", unpacked_output)
             locale_starts[resourceLocale] = caret
+            _write_to_list(f"Starting Index of Locale \"{resourceLocale}\" data (4-bytes)': {_read(content, caret + 7, 4)}", unpacked_output)
             caret += _LOCALE_HEADER_SIZE
         translation_dict = {}
         for locale, locale_start in locale_starts.items():
             locale_dict = {}
             translation_dict[locale] = locale_dict
             headerStart = _read(content, locale_start + 7, 4)
-            mapping = _map_translations(content, startOfLocaleData, headerStart)
+            _write_to_list(f">>> Information about locale: \"{locale}\" <<<", unpacked_output)
+            mapping = _map_translations(content, startOfLocaleData, headerStart, startOfStringData, encoding, unpacked_output)
             string_mapping = mapping["string"]
             for android_id, string_pack_id in string_mapping.items():
                 locale_dict[android_id] = _loadString(
@@ -468,6 +500,14 @@ def repack(
     unused_resource = get_unused_resource(nullified_resource)
     translation.remove_unused_translation(id_finder, unused_resource)
     build_with_dict(output, translation)
+
+
+def unpack(original_pack: str, output_file: str) -> None:
+    unpacked_output = []
+    StringPack.from_file(original_pack, unpacked_output)
+    with open(output_file, "wt") as unpacked_file:
+        unpacked_file.writelines("\n".join(unpacked_output))
+
 
 
 def main():
