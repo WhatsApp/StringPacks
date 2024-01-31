@@ -89,7 +89,8 @@ public class ParsedStringPack {
       // It doesn't exist.
       return null;
     }
-    // TODO(T176824784): pluralRules only accept Strings or Longs, we need to convert `quantity` type if needed.
+    // TODO(T176824784): pluralRules only accept Strings or Longs, we need to convert `quantity`
+    // type if needed.
     final int index = quantityIndex(pluralRules.quantityForNumber(quantity));
     String result = plural[index];
     if (result != null) {
