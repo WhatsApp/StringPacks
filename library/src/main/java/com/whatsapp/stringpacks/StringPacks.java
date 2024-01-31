@@ -71,7 +71,7 @@ public class StringPacks {
     // Read locale from context instead of appRes in case there is an overridden custom locale.
     final Locale locale = getLocaleFromContext(context.getResources());
 
-    // TODO: Don't re-setup if the new locale is the same as the previous one.
+    // TODO(T176824784) Don't re-setup if the new locale is the same as the previous one.
 
     final boolean useStringPack = !useSystemResources(locale);
 
@@ -145,7 +145,7 @@ public class StringPacks {
     synchronized (stringPackLock) {
       if (parsedStringPack != null) {
         if (isPlural) {
-          // TODO better fix for the int / long interfaces.
+          // TODO(T176824784) better fix for the int / long interfaces.
           translation = parsedStringPack.getQuantityString(location, (long) quantity, pluralRules);
         } else {
           translation = parsedStringPack.getString(location);

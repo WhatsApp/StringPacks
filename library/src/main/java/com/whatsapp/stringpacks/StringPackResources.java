@@ -52,20 +52,20 @@ public class StringPackResources extends Resources {
 
   @Override
   public CharSequence getText(int id) throws NotFoundException {
-    // TODO: Support getText() in StringPacks.
+    // TODO(T176823671) Support getText() in StringPacks.
     return stringPacks.getString(id);
   }
 
   @Override
   public CharSequence getText(int id, CharSequence def) {
-    // TODO: Support getText() in StringPacks.
+    // TODO(T176823671) Support getText() in StringPacks.
     String text = id != 0 ? stringPacks.getString(id) : null;
     return text != null ? text : def;
   }
 
   @Override
   public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
-    // TODO: Support getQuantityText() in StringPacks.
+    // TODO(T176823853) Support getQuantityText() in StringPacks.
     return stringPacks.getQuantityString(id, quantity);
   }
 

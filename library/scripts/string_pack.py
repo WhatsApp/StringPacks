@@ -364,14 +364,6 @@ class TranslationDict(object):
     def add_for_locale(self, locale, string_dict: Dict):
         locale_dict = self.store[locale]
         for key, value in string_dict.items():
-            # TODO: Uncomment this once the Warning is fixed. Commenting it temporarily as
-            # it throws a whole lots of Warnings that are non-actionable
-            # if key in locale_dict:
-            #    logging.warning(
-            #        "Warning: id {} being overridden by:{}, previous value:{}".format(
-            #            key, value, locale_dict[key]
-            #        )
-            #    )
             locale_dict[key] = value
 
     def add_translation(self, translation_dict: Dict):
