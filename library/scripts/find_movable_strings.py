@@ -16,7 +16,7 @@ from typing import Dict, List, Set, Tuple
 from xml.etree import ElementTree
 
 import string_pack_config
-from move_strings_for_packing import get_resource_content_without_header
+from move_strings_for_packing import get_resource_content_with_resources_header
 
 
 # Escape code for color
@@ -53,7 +53,7 @@ DONOTPACK_RE = re.compile('<(?:string|plurals) name="([^"]+)".*donotpack="true"'
 
 def find_donotpack_strings(filename):
     result = set()
-    data = get_resource_content_without_header(filename)
+    header, data = get_resource_content_with_resources_header(filename)
     for match in DONOTPACK_RE.finditer(data):
         result.add(match.group(1))
     return result
