@@ -76,6 +76,7 @@ class StringPackConfig:
     FIELDS_TO_OVERRIDE = [
         "module",
         "original_resources_directories",
+        "destination_stringpack_directories",
         "find_resource_files_command",
         "languages_to_pack",
         "languages_to_drop",
@@ -97,6 +98,18 @@ class StringPackConfig:
         # MOVE operation moves packable strings found in FIND to the directory's string-packs/strings subdirectory.
         # PACK operation packs the files in the directory's string-packs/strings subdirectory into .pack files in assets_directory.
         self.original_resources_directories = []
+
+        # The directories where the script will save the strings.xml that need to be stringpacked after the MOVE command.
+        # Format:
+        # {"original_resource_directory": "destination_stringpack_xml_directory"}
+        # This allows saving values-xx/strings.xml (candidates for PACK command) files for a module at any custom location and not necessarily at the
+        # original_resource_directory/string-packs/strings subdirectory.
+        # The script will create the destination_stringpack_xml_directory if it doesn't exist.
+        # If the destination_stringpack_xml_directory is not specified, the script will save the files at the original_resource_directory/string-packs/strings subdirectory.
+        # If the destination_stringpack_xml_directory is specified, the script will save the files at the destination_stringpack_xml_directory/string-packs/strings subdirectory.
+        # MOVE - If a original_resource_directory key is present, it will copy to the new destination directory, else original_resource_directory
+        # PACK - If a original_resource_directory key is present, it will pack from the new destination directory, else original_resource_directory
+        self.destination_stringpack_directories = {}
 
         # Executable command line that returns all resource files for parsing movable strings.
         self.find_resource_files_command = None

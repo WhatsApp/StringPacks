@@ -101,9 +101,17 @@ def move_strings(srcfile, dstfile, id_finder, keep_dest):
         xml_file.write(FOOTER)
 
 
-def get_dest_file(moved_resource_directory, language_qualifier):
+def get_dest_file(
+    moved_resource_directory, language_qualifier, destination_stringpack_directories_map
+):
+    if moved_resource_directory in destination_stringpack_directories_map:
+        stringpack_root_dir = destination_stringpack_directories_map[
+            moved_resource_directory
+        ]
+    else:
+        stringpack_root_dir = moved_resource_directory
     dest_file = os.path.join(
-        moved_resource_directory,
+        stringpack_root_dir,
         "string-packs",
         "strings",
         "values-" + language_qualifier,
@@ -139,7 +147,11 @@ def move_all_strings(sp_config, keep_dest):
                 logging.info("Moving: %s", string_xml_path)
                 move_strings(
                     string_xml_path,
-                    get_dest_file(resources_directory, resource_qualifier),
+                    get_dest_file(
+                        resources_directory,
+                        resource_qualifier,
+                        sp_config.destination_stringpack_directories,
+                    ),
                     id_finder,
                     keep_dest,
                 )

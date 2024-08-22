@@ -47,7 +47,11 @@ def pack_strings(sp_config: StringPackConfig, plural_handler):
 
     moved = []
     for directory in sp_config.original_resources_directories:
-        moved.append(os.path.join(directory, "string-packs", "strings"))
+        if directory in sp_config.destination_stringpack_directories:
+            root_dir = sp_config.destination_stringpack_directories[directory]
+        else:
+            root_dir = directory
+        moved.append(os.path.join(root_dir, "string-packs", "strings"))
 
     for directory in moved:
         packable_strings_file_paths.update(
