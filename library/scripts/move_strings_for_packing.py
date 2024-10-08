@@ -117,7 +117,7 @@ def get_dest_file(
         "values-" + language_qualifier,
         "strings.xml",
     )
-    logging.info("To file: %s", dest_file)
+    logging.debug("To file: %s", dest_file)
     return dest_file
 
 
@@ -144,7 +144,7 @@ def move_all_strings(sp_config, keep_dest):
                 )
                 move_strings(string_xml_path, os.devnull, id_finder, keep_dest=False)
             elif handler_case == LanguageHandlingCase.PACK:
-                logging.info("Moving: %s", string_xml_path)
+                logging.debug("Moving: %s", string_xml_path)
                 move_strings(
                     string_xml_path,
                     get_dest_file(
