@@ -1,0 +1,33 @@
+/* Copyright (c) Facebook, Inc. and its affiliates. All rights reserved.
+ *
+ * This source code is licensed under the Apache 2.0 license found in
+ * the LICENSE file in the root directory of this source tree.
+ */
+
+import groovy.json.JsonSlurper
+
+// Register task to generate string pack files.
+if (hasProperty('stringPacksConfigFile')) {
+    def configFile = file(property('stringPacksConfigFile'))
+    def spConfig = new JsonSlurper().parse(configFile)
+
+    def packScript = "$rootDir/${spConfig.pack_scripts_directory}/pack_strings.py"
+
+    def assetsDir = "$rootDir/${spConfig.assets_directory}"
+
+    tasks.register('generateStringPacks', Exec) {
+        workingDir "$rootDir"
+
+        commandLine 'python3', packScript, '--config', configFile.path
+    }
+
+    tasks.whenTaskAdded { task ->
+        if (task.name =~ /^generate.*Assets$/) {
+            task.dependsOn generateStringPacks
+        }
+    }
+
+    clean.doFirst {
+        delete fileTree(assetsDir).include("strings_*.pack")
+    }
+}

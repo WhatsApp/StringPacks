@@ -1,0 +1,29 @@
+/* Copyright (c) Facebook, Inc. and its affiliates. All rights reserved.
+ *
+ * This source code is licensed under the Apache 2.0 license found in
+ * the LICENSE file in the root directory of this source tree.
+ */
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 29
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
+}
+

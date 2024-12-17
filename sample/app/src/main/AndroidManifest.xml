@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.whatsapp.stringpacks.sample">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <application
+            android:name=".SampleApplication"
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@drawable/ic_launcher"
+            android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name="com.whatsapp.stringpacks.receiver.MyPackageReplacedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.whatsapp.stringpacks.service.PackFileDeletionService" android:permission="android.permission.BIND_JOB_SERVICE" />
+    </application>
+
+</manifest>

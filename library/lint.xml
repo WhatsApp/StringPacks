@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="all">
+        <!-- PluralRules.java copied from AOSP so it make no sense to run lint checks against it -->
+        <ignore path="src/main/java/com/whatsapp/stringpacks/PluralRules.java" />
+    </issue>
+</lint>
