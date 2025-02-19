@@ -21,7 +21,6 @@ from string_pack_config import LanguageHandlingCase, StringPackConfig
 def group_string_files_by_languages(
     sp_config: StringPackConfig, packable_strings_file_paths
 ):
-
     # A map from language (aka, pack ID) to list of string resource files.
     grouped_files = collections.defaultdict(list)
 
