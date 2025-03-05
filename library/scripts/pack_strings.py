@@ -42,7 +42,7 @@ def get_dest_pack_file_path(sp_config: StringPackConfig, pack_id):
 
 def pack_strings(sp_config: StringPackConfig, plural_handler):
     id_finder = IdFinder.from_stringpack_config(sp_config)
-    packable_strings_file_paths = set()
+    packable_strings_file_paths = []
 
     moved = []
     for directory in sp_config.original_resources_directories:
@@ -53,9 +53,13 @@ def pack_strings(sp_config: StringPackConfig, plural_handler):
         moved.append(os.path.join(root_dir, "string-packs", "strings"))
 
     for directory in moved:
-        packable_strings_file_paths.update(
+        string_files = sorted(
             glob.glob(os.path.join(directory, "**/strings.xml"), recursive=True)
         )
+        new_string_files = [
+            file for file in string_files if file not in packable_strings_file_paths
+        ]
+        packable_strings_file_paths.extend(new_string_files)
 
     grouped_strings_file_paths = group_string_files_by_languages(
         sp_config, packable_strings_file_paths
