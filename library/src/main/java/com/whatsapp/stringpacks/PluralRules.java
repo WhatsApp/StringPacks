@@ -111,7 +111,8 @@ public abstract class PluralRules {
   // For terms of use, see http://www.unicode.org/copyright.html
   static {
     addRules(
-        "bm bo dz id ig ii in ja jbo jv jw kde kea km ko lkt lo ms my nqo osa root sah ses sg su th to vi wo yo yue zh",
+        "bm bo dz id ig ii in ja jbo jv jw kde kea km ko lkt lo ms my nqo osa root sah ses sg su th"
+            + " to vi wo yo yue zh",
         new PluralRules() {
           @Quantity
           public int quantityForNumber(double n, long i, int v, int w, long f, long t) {
@@ -203,7 +204,10 @@ public abstract class PluralRules {
           }
         });
     addRules(
-        "af an asa az bem bez bg brx ce cgg chr ckb dv ee el eo es eu fo fur gsw ha haw hu jgo jmc ka kaj kcg kk kkj kl ks ksb ku ky lb lg mas mgo ml mn mr nah nb nd ne nn nnh no nr ny nyn om or os pap ps rm rof rwk saq sd sdh seh sn so sq ss ssy st syr ta te teo tig tk tn tr ts ug uz ve vo vun wae xh xog",
+        "af an asa az bem bez bg brx ce cgg chr ckb dv ee el eo es eu fo fur gsw ha haw hu jgo jmc"
+            + " ka kaj kcg kk kkj kl ks ksb ku ky lb lg mas mgo ml mn mr nah nb nd ne nn nnh no nr"
+            + " ny nyn om or os pap ps rm rof rwk saq sd sdh seh sn so sq ss ssy st syr ta te teo"
+            + " tig tk tn tr ts ug uz ve vo vun wae xh xog",
         new PluralRules() {
           @Quantity
           public int quantityForNumber(double n, long i, int v, int w, long f, long t) {

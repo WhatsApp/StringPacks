@@ -12,6 +12,7 @@ public class IdsRange {
   private static final int STRING_END = 0x7f120001;
   private static final int PLURALS_BEGIN = 0x7f110000;
   private static final int PLURALS_END = 0x7f110000;
+
   // endregion
   public void doSomething() {}
 }
