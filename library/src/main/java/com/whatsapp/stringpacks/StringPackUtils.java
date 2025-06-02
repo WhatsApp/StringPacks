@@ -18,7 +18,11 @@ public class StringPackUtils {
   public static Locale getLocaleFromConfiguration(@NonNull Configuration configuration) {
     Locale locale;
     if (Build.VERSION.SDK_INT >= 24) {
-      locale = configuration.getLocales().get(0);
+      if (configuration.getLocales().isEmpty()) {
+        locale = Locale.getDefault();
+      } else {
+        locale = configuration.getLocales().get(0);
+      }
     } else {
       locale = configuration.locale;
     }
