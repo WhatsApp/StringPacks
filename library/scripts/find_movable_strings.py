@@ -157,10 +157,10 @@ def output_string_ids_config(
         )
         return
 
-    STRING_BEGIN = "public static final int STRING_BEGIN = "
-    STRING_END = "public static final int STRING_END = "
-    PLURALS_BEGIN = "public static final int PLURALS_BEGIN = "
-    PLURALS_END = "public static final int PLURALS_END = "
+    STRING_BEGIN = "public static int STRING_BEGIN = "
+    STRING_END = "public static int STRING_END = "
+    PLURALS_BEGIN = "public static int PLURALS_BEGIN = "
+    PLURALS_END = "public static int PLURALS_END = "
     leading_space_num = source_file_lines[region_start_index].index("//")
     leading_space = " " * leading_space_num
     output_source_file_lines = source_file_lines[0 : region_start_index + 1]
