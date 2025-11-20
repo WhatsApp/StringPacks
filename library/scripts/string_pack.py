@@ -381,6 +381,20 @@ class TranslationDict(object):
             if len(store[locale]) == 0:
                 del store[locale]
 
+    def remap_entries(self, id_remapping: dict[int, int]):
+        new_store = collections.defaultdict(dict)
+        for locale in self.store:
+            locale_dict = self.store[locale]
+            updated_dict = {}
+            for resource_id in locale_dict:
+                if resource_id in id_remapping:
+                    updated_dict[id_remapping[resource_id]] = locale_dict[resource_id]
+            if len(updated_dict) != 0:
+                new_store[locale] = updated_dict
+        self.store = new_store
+
+
+
 
 class StringPack(object):
     "The full string pack, with information about locales, ids, plurals, etc"
@@ -533,6 +547,26 @@ def repack(
     id_finder = IdFinder.from_resource_config(resource_config)
     unused_resource = get_unused_resource(nullified_resource)
     translation.remove_unused_translation(id_finder, unused_resource)
+    build_with_dict(output, translation)
+
+def build_id_remapping(remapping_file: str) -> dict[int, int]:
+    # Expects a file filled with lines like "10 12", meaning
+    # the string/plural with the string ID 10 is remapped to 12
+    with open(remapping_file, "r") as file:
+        remapping = {}
+        for line in file:
+            ids = line.split(' ')
+            remapping[int(ids[0].strip())] = int(ids[1].strip())
+        return remapping
+
+def remap(
+    remapping_file: str, original_pack: str, output: str
+) -> None:
+    translation = TranslationDict()
+    input_dict = StringPack.from_file(original_pack)
+    translation.add_translation(input_dict)
+    id_remapping = build_id_remapping(remapping_file)
+    translation.remap_entries(id_remapping)
     build_with_dict(output, translation)
 
 
