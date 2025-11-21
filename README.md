@@ -60,7 +60,7 @@ Check out [our tech talk on StringPacks from DroidCon SF 2019](https://youtu.be/
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application ...>
       ...
-      <receiver android:name="com.whatsapp.stringpacks.receiver.MyPackageReplacedReceiver">
+      <receiver android:name="com.whatsapp.stringpacks.receiver.MyPackageReplacedReceiver" android:exported="false">
         <intent-filter>
             <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
         </intent-filter>

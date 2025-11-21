@@ -6,9 +6,10 @@
 
 package com.whatsapp.stringpacks.receiver;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import com.facebook.secure.receiver.BroadcastReceiverLike;
+import com.facebook.secure.receiver.ProtectedActionStaticBroadcastReceiver;
 import com.whatsapp.stringpacks.service.PackFileDeletionService;
 
 /**
@@ -19,10 +20,10 @@ import com.whatsapp.stringpacks.service.PackFileDeletionService;
  * <p>When this broadcast event is received, we cleanup all the .pack files, from internal storage,
  * that were created by the previous build, in a {@code Service}
  */
-public class MyPackageReplacedReceiver extends BroadcastReceiver {
+public class MyPackageReplacedReceiver extends ProtectedActionStaticBroadcastReceiver {
 
   @Override
-  public void onReceive(Context context, Intent intent) {
+  public void doReceive(Context context, Intent intent, BroadcastReceiverLike receiver) {
     Intent serviceIntent = new Intent(context, PackFileDeletionService.class);
     serviceIntent.setAction(PackFileDeletionService.ACTION_PACK_FILE_DELETE);
 
