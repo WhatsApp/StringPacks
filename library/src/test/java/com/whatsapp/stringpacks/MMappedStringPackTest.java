@@ -6,9 +6,8 @@
 
 package com.whatsapp.stringpacks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,30 +59,30 @@ public class MMappedStringPackTest {
 
       parsedStringPack = new ParsedStringPack(Collections.singletonList("zh"), mappedByteBuffer);
     } catch (IOException e) {
-      Assert.fail("Test setup failure" + e);
+      assertWithMessage("Test setup failure" + e).fail();
     }
   }
 
   @Test
   public void getString() {
     String stringMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", stringMMapped);
+    assertThat(stringMMapped).isEqualTo("你好，世界");
   }
 
   @Test
   public void getString_MultipleTimes() {
     String firstMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", firstMMapped);
+    assertThat(firstMMapped).isEqualTo("你好，世界");
 
     String secondMMapped = parsedStringPack.getString(StringPacksTestData.STRING_ID);
-    assertEquals("你好，世界", secondMMapped);
+    assertThat(secondMMapped).isEqualTo("你好，世界");
   }
 
   @Test
   public void getString_WithNonexistentId() {
     String nonexistentMMapped =
         parsedStringPack.getString(StringPacksTestData.EXPECTED_STRINGS.length + 1);
-    assertNull(nonexistentMMapped);
+    assertThat(nonexistentMMapped).isNull();
   }
 
   @Test
@@ -92,7 +90,7 @@ public class MMappedStringPackTest {
     String nonexistentMMapped =
         parsedStringPack.getQuantityString(
             StringPacksTestData.PLURALS_ID + 1, 2, StringPacksTestData.TEST_PLURAL_RULES);
-    assertNull(nonexistentMMapped);
+    assertThat(nonexistentMMapped).isNull();
   }
 
   @Test
@@ -102,7 +100,7 @@ public class MMappedStringPackTest {
       String string =
           parsedStringPack.getQuantityString(
               StringPacksTestData.PLURALS_ID, (long) i, StringPacksTestData.TEST_PLURAL_RULES);
-      assertEquals(expectedQuantityStrings[i], string);
+      assertThat(string).isEqualTo(expectedQuantityStrings[i]);
     }
   }
 
@@ -131,11 +129,13 @@ public class MMappedStringPackTest {
     Thread.sleep(2000);
     for (int i = 0; i < numberOfThreads; i++) {
       Future<String> result = resultsWithMMap.get(i);
-      assertTrue(!result.isCancelled());
+      assertThat(!result.isCancelled()).isTrue();
       try {
-        assertEquals("Problem fetching correct string", expected, result.get());
+        assertWithMessage("Problem fetching correct string")
+            .that(result.get())
+            .isEqualTo(expected);
       } catch (ExecutionException ee) {
-        assertTrue("Exception when fetching string " + ee.toString(), false);
+        assertWithMessage("Exception when fetching string " + ee.toString()).that(false).isTrue();
       }
     }
   }
@@ -170,12 +170,14 @@ public class MMappedStringPackTest {
     Thread.sleep(2000);
     for (int i = 0; i < numberOfThreads; i++) {
       Future<List<String>> result = resultsWithMMap.get(i);
-      assertTrue(!result.isCancelled());
+      assertThat(!result.isCancelled()).isTrue();
       try {
         List<String> output = result.get();
-        assertEquals("Problem fetching correct string", output.get(0), output.get(1));
+        assertWithMessage("Problem fetching correct string")
+            .that(output.get(1))
+            .isEqualTo(output.get(0));
       } catch (ExecutionException ee) {
-        assertTrue("Exception when fetching string " + ee.toString(), false);
+        assertWithMessage("Exception when fetching string " + ee.toString()).that(false).isTrue();
       }
     }
   }
@@ -213,14 +215,14 @@ public class MMappedStringPackTest {
     Thread.sleep(2000);
     for (int i = 0; i < numberOfThreads; i++) {
       Future<String[]> result = resultsWithMMap.get(i);
-      assertTrue(!result.isCancelled());
+      assertThat(!result.isCancelled()).isTrue();
       try {
         String[] actual = result.get();
         for (int j = 0; j < numQuantityStrings; j++) {
-          assertEquals("Correct plural not fetched", expected[j], actual[j]);
+          assertWithMessage("Correct plural not fetched").that(actual[j]).isEqualTo(expected[j]);
         }
       } catch (ExecutionException ee) {
-        assertTrue("Exception when fetching plurals " + ee.toString(), false);
+        assertWithMessage("Exception when fetching plurals " + ee.toString()).that(false).isTrue();
       }
     }
   }
