@@ -12,9 +12,9 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import java.io.IOException
 import java.util.Locale
-import org.junit.Assert.fail
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -56,19 +56,19 @@ class StringPacksTest {
       val inputStream = requireNotNull(javaClass.classLoader) { "ClassLoader must not be null" }.getResourceAsStream("strings_zh.pack")
       whenever(assetManager.open("strings_zh.pack")).thenReturn(inputStream)
     } catch (e: IOException) {
-      fail("Test setup failure$e")
+      assertWithMessage("Test setup failure$e").fail()
     }
     try {
       val inputStream = requireNotNull(javaClass.classLoader) { "ClassLoader must not be null" }.getResourceAsStream("strings_zh-rTW.pack")
       whenever(assetManager.open("strings_zh-rTW.pack")).thenReturn(inputStream)
     } catch (e: IOException) {
-      fail("Test setup failure$e")
+      assertWithMessage("Test setup failure$e").fail()
     }
     try {
       val inputStream = requireNotNull(javaClass.classLoader) { "ClassLoader must not be null" }.getResourceAsStream("strings_ha.pack")
       whenever(assetManager.open("strings_ha.pack")).thenReturn(inputStream)
     } catch (e: IOException) {
-      fail("Test setup failure$e")
+      assertWithMessage("Test setup failure$e").fail()
     }
     StringPacks.getInstance()
         .register(intArrayOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15))
