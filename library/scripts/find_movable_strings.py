@@ -80,14 +80,18 @@ def find_strings_used_in_xml(filename, safe_widgets):
                         continue  # Certain namespace are safe to use @string in
                     result.add(string_usage_match.group(1))
     except ElementTree.ParseError:
-        logging.warning(
-            SET_WARNING_COLOR
-            + "Dropping the file becase of ParseError: "
-            + filename
-            + CLEAR_COLOR
-        )
-    finally:
-        return result
+        try:
+            logging.warning(
+                SET_WARNING_COLOR
+                + "Dropping the file becase of ParseError: "
+                + filename
+                + CLEAR_COLOR
+            )
+        except BaseException:  # noqa: B036
+            pass
+    except BaseException:  # noqa: B036
+        pass
+    return result
 
 
 NAME_CATCHER_RE = re.compile('<(string|plurals) name="([^"]+)"')
