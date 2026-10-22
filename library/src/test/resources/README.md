@@ -122,7 +122,7 @@ This file is generated from `res/values-ha-rNG/strings.xml` and `res/values-ha/s
 
 The corresponding resources id to pack is mapping is like below:
 
-```
+```text
 {
     R.plurals.plural_list, 0,
     R.string.hello_africa, 1,

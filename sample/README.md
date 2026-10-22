@@ -13,7 +13,7 @@ After the project is loaded, click "Run" button, the `stringpacks` library shoul
 
 Whenever you add new translated string resources in the Sample project, run following command in the `sample/` directory to move packable strings to `string-packs` directory:
 
-```
+```text
 python3 ../library/scripts/assemble_string_packs.py --config ./app/src/main/string-packs/config.json
 ```
 

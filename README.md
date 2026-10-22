@@ -29,7 +29,7 @@ Check out [our tech talk on StringPacks from DroidCon SF 2019](https://youtu.be/
         - `plurals_offset` a hex string for plural id offset (usually "0x7f100000")
         - `package_name` for package name.
 4. Make following changes to your Android project's `build.gradle`.
-   ```
+   ```text
    allprojects {
 
      repositories {
@@ -46,7 +46,7 @@ Check out [our tech talk on StringPacks from DroidCon SF 2019](https://youtu.be/
    ```
    - Replace `{path_to_config.json}` with the path to your `config.json` file
 5. Make following changes to your Android application's `build.gradle`
-   ```
+   ```text
    apply from: "$rootDir/pack.gradle"
 
    dependencies {
@@ -246,7 +246,7 @@ Those string resource IDs that are not listed in the `StringPackIds` file, will 
 Now, you can use gradle to build your application as usual. The application should correctly retrieve the strings from StringPacks.
 
 ## License
-```
+```text
 Copyright (c) Facebook, Inc. and its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
